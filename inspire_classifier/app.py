@@ -1,7 +1,8 @@
 from flask import Flask
-from flask import request
+from flask import jsonify, request
 
 import datetime
+
 
 app = Flask(__name__)
 
@@ -10,7 +11,7 @@ app = Flask(__name__)
 def date():
     """Basic endpoint that returns the date, used to check if everything is up and working"""
     now = datetime.datetime.now()
-    return str(now)
+    return jsonify(now)
 
 
 @app.route("/api/classifier", methods=["POST"])
@@ -22,4 +23,4 @@ def core_classifier():
     Returns an array with three float values that correspond to the probability of the record being Rejected, Non-Core and Core."""
     result = request.get_json(force=True)
 
-    return str(result)
+    return jsonify(result)
