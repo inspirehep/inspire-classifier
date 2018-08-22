@@ -35,3 +35,24 @@ About
 =====
 
 INSPIRE module aimed at automatically classifying the new papers that are added to INSPIRE, such as if they are core or not, or the arXiv category corresponding to each of them.
+
+Run the development server with:
+
+.. highlight:: bash
+    $ FLASK_DEBUG=true FLASK_APP=inspire_classifier/app.py flask run
+
+Example:
+
+.. highlight:: bash
+    $ curl -i http://127.0.0.1:5000/api/classifier --data "{\"title\": \"Alice In Wonderland\", \"abstract\": \"The reader is conveyed to Wonderland, a world that has no apparent connection with reality...\"}"
+    HTTP/1.0 200 OK
+    Content-Type: application/json
+    Content-Length: 52
+    Server: Werkzeug/0.14.1 Python/3.6.4
+    Date: Wed, 22 Aug 2018 13:00:16 GMT
+
+    {
+      "score1": 5,
+      "score2": 10,
+      "score3": 15
+    }

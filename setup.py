@@ -34,11 +34,8 @@ readme = open('README.rst').read()
 setup_requires = []
 
 install_requires = [
-    'Flask-Breadcrumbs~=0.0,>=0.4.0',
-    'Flask-CeleryExt~=0.0,>=0.3.1',
-    'Flask-Gravatar~=0.0,>=0.4.2',
-    'Flask-Login~=0.0,>=0.4.0',
-    'Flask~=0.0,>=0.12.4',
+    'Flask~=1.0,>=1.0.2',
+    'marshmallow~=3.0.0b13,>=3.0.0b13'
 ]
 
 docs_require = []
@@ -47,10 +44,7 @@ tests_require = [
     'flake8-future-import~=0.0,>=0.4.3',
     'mock~=2.0,>=2.0.0',
     'pytest-cov~=2.0,>=2.5.1',
-    'pytest-selenium~=1.0,>=1.11.1',
-    'pytest-vcr~=0.0,>=0.3.0',
     'pytest~=3.0,>=3.3.0',
-    'requests_mock~=1.0,>=1.3.0',
 ]
 
 extras_require = {
