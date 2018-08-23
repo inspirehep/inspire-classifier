@@ -1,13 +1,26 @@
 import datetime
 
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, Response
 from marshmallow.exceptions import ValidationError
 
 from . import serializers
 from .domain.models import CoreClassifier
 
 
+#response class that forces every response to be in json, getting rid of "jsonify" functions in the code
+class JsonResponse(Response):
+    @classmethod
+    def force_type(cls, rv, environ=None):
+        if isinstance(rv, dict):
+            rv = jsonify(rv)
+        return super(JsonResponse, cls).force_type(rv, environ)
+
+classifier = CoreClassifier()
+Flask.response_class = JsonResponse
 app = Flask(__name__)
+
+
+
 
 
 @app.route("/api/health")
@@ -34,12 +47,23 @@ def core_classifier():
     try:
         data = input_serializer.load(request.get_json(force=True))
     except ValidationError as exc:
-        # TODO: we do not want to fail when extra data are sent as input.
-        return jsonify(exc.messages), 400
+        return {
+            "errors": [
+                exc.messages
+            ]
+        }, 400
 
     # Run the domain model.
-    classifier = CoreClassifier(data['title'], data['abstract'])
-    classifier.classify()
+    classifier.predict(data['title'], data['abstract'])
 
     # Build the response.
-    return jsonify(output_serializer.dump(classifier))
+    return output_serializer.dump(classifier)
+
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return {
+        "errors": [
+            str(e)
+        ]
+    }, 404

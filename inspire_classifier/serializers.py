@@ -1,13 +1,14 @@
-from marshmallow import Schema, fields
+from marshmallow import Schema, fields, INCLUDE
 
 
 class ClassifierInputSerializer(Schema):
-    # TODO: set max size?
+    class Meta:
+        unknown = INCLUDE
     title = fields.Str(required=True)
     abstract = fields.Str(required=True)
 
 
 class ClassifierOutputSerializer(Schema):
-    score1 = fields.Integer(attribute='score_a', required=True)
-    score2 = fields.Integer(attribute='score_b', required=True)
-    score3 = fields.Integer(attribute='score_c', required=True)
+    score1 = fields.Float(attribute='score_a', required=True)
+    score2 = fields.Float(attribute='score_b', required=True)
+    score3 = fields.Float(attribute='score_c', required=True)

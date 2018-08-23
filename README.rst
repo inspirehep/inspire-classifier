@@ -52,7 +52,7 @@ Example:
     Date: Wed, 22 Aug 2018 13:00:16 GMT
 
     {
-      "score1": 5,
-      "score2": 10,
-      "score3": 15
+      "score1": 0.1,
+      "score2": 0.2,
+      "score3": 0.7
     }
