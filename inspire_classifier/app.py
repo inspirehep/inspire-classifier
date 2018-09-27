@@ -3,12 +3,13 @@ import datetime
 from flask import Flask, jsonify, request, Response
 from marshmallow.exceptions import ValidationError
 
-from . import serializers
-from .domain.models import CoreClassifier
+import serializers
+from domain import CoreClassifier
 
 
-#response class that forces every response to be in json, getting rid of "jsonify" functions in the code
 class JsonResponse(Response):
+    """"By creaitng this Response class, we force the response to always be in json, getting rid of the jsonify function."""
+
     @classmethod
     def force_type(cls, rv, environ=None):
         if isinstance(rv, dict):
@@ -18,9 +19,6 @@ class JsonResponse(Response):
 classifier = CoreClassifier()
 Flask.response_class = JsonResponse
 app = Flask(__name__)
-
-
-
 
 
 @app.route("/api/health")
@@ -38,14 +36,11 @@ def core_classifier():
 
     Returns an array with three float values that correspond to the probability of the record being Rejected, Non-Core and Core."""
 
-    # TODO: make it always return JSON content in case of errors (like when it's a GET); it currently returns HTML.
-
     input_serializer = serializers.ClassifierInputSerializer()
     output_serializer = serializers.ClassifierOutputSerializer()
 
-    # Parse the input data.
     try:
-        data = input_serializer.load(request.get_json(force=True))
+        data = input_serializer.load(request.get_json(force=True))[0]
     except ValidationError as exc:
         return {
             "errors": [
@@ -53,10 +48,8 @@ def core_classifier():
             ]
         }, 400
 
-    # Run the domain model.
     classifier.predict(data['title'], data['abstract'])
 
-    # Build the response.
     return output_serializer.dump(classifier)
 
 
@@ -67,3 +60,7 @@ def page_not_found(e):
             str(e)
         ]
     }, 404
+
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0')

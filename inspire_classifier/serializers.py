@@ -1,9 +1,9 @@
-from marshmallow import Schema, fields, INCLUDE
+from marshmallow import Schema, fields#, INCLUDE
 
 
 class ClassifierInputSerializer(Schema):
-    class Meta:
-        unknown = INCLUDE
+    #class Meta:
+    #    unknown = INCLUDE
     title = fields.Str(required=True)
     abstract = fields.Str(required=True)
 
