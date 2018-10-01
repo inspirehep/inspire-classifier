@@ -3,7 +3,7 @@ import datetime
 from flask import Flask, jsonify, request, Response
 from marshmallow.exceptions import ValidationError
 
-import .serializers
+import .serializers as serializers
 from .domain import CoreClassifier
 
 
