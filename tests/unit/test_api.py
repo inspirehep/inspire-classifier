@@ -22,6 +22,8 @@
 
 from __future__ import absolute_import, division, print_function
 
+from inspire_classifier import serializers
+
 from marshmallow.exceptions import ValidationError
 
 import pytest

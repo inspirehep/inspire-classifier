@@ -1,3 +1,4 @@
 flask
 marshmallow
 flake8
+pytest-cov
