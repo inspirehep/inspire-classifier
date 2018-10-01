@@ -1,2 +1,3 @@
 flask
 marshmallow
+flake8
