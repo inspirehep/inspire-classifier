@@ -16,6 +16,7 @@ class JsonResponse(Response):
             rv = jsonify(rv)
         return super(JsonResponse, cls).force_type(rv, environ)
 
+
 classifier = CoreClassifier()
 Flask.response_class = JsonResponse
 app = Flask(__name__)

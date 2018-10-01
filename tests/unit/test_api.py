@@ -24,6 +24,7 @@ from __future__ import absolute_import, division, print_function
 
 from marshmallow.exceptions import ValidationError
 
+
 def test_input_serializer():
     input_serializer = serializers.ClassifierInputSerializer()
 
@@ -82,7 +83,7 @@ def test_output_serializer_raises_exception():
         output_serializer.load(request)
 
 
-def test_output_serializer_doe_not_accept_extra_fields:
+def test_output_serializer_doe_not_accept_extra_fields():
     output_serializer = serializers.ClassifierOutputSerializer()
 
     scores = {
@@ -93,4 +94,4 @@ def test_output_serializer_doe_not_accept_extra_fields:
     }
 
     with pytest.raises(ValidationError):
-        output_serializer.load(request)  
+        output_serializer.load(request)
