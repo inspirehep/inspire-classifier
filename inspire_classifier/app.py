@@ -27,7 +27,7 @@ import datetime
 from flask import Flask, jsonify, request, Response
 from marshmallow.exceptions import ValidationError
 
-import serializers
+from . import serializers
 from .domain.models import CoreClassifier
 
 
@@ -65,7 +65,7 @@ def core_classifier():
     output_serializer = serializers.ClassifierOutputSerializer()
 
     try:
-        data = input_serializer.load(request.get_json(force=True))[0]
+        data = input_serializer.load(request.get_json(force=True))
     except ValidationError as exc:
         return {
             "errors": [

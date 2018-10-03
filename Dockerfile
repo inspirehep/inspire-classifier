@@ -20,17 +20,14 @@
 # granted to it by virtue of its status as an Intergovernmental Organization
 # or submit itself to any jurisdiction.
 
-FROM centos:7.4.1708
-
-RUN yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm && \
-    yum update -y && \
-    yum install -y \
-        python-pip \
-        && \
-    yum clean all
+FROM python:3.6-alpine
 
 COPY . /app
 WORKDIR /app
 RUN pip install -r requirements.txt
-ENTRYPOINT ["python"]
-CMD ["inspire_classifier/app.py"]
+RUN pip install gunicorn
+RUN chmod +x boot.sh
+
+ENV FLASK_APP app.py
+
+ENTRYPOINT ["./boot.sh"]
