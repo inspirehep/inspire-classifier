@@ -31,7 +31,9 @@ url = 'https://github.com/inspirehep/inspire-classifier'
 
 readme = open('README.rst').read()
 
-setup_requires = []
+setup_requires = [
+    'autosemver~=0.0,>=0.5.2',
+]
 
 install_requires = [
     'Flask~=1.0,>=1.0.2',

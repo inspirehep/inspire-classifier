@@ -1,4 +1,4 @@
-flask
-marshmallow
-flake8
-pytest-cov
+flask==1.0.2
+marshmallow==3.0.0b13
+flake8-future-import==0.4.3
+pytest-cov==2.5.1
