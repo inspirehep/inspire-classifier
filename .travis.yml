@@ -43,8 +43,8 @@ install:
 
 script:
     - chmod +x *.sh
-    - ./travis.sh
     - ./run-tests.sh
+    - ./travis.sh
 
 notifications:
   webhooks:
