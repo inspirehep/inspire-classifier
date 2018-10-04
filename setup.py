@@ -52,14 +52,11 @@ tests_require = [
 extras_require = {
     'docs': docs_require,
     'tests': tests_require,
-    'tests:python_version=="2.7"': [
-        'unicode-string-literal~=1.0,>=1.1',
-    ],
 }
 
 extras_require['all'] = []
 for name, reqs in extras_require.items():
-    if name not in ['all', 'tests:python_version=="2.7"']:
+    if name not in ['all']:
         extras_require['all'].extend(reqs)
 
 packages = find_packages(exclude=['docs', 'tests'])
@@ -90,8 +87,6 @@ setup(
         'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.6',
         'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
