@@ -1,58 +1,27 @@
-# -*- coding: utf-8 -*-
-#
-# This file is part of INSPIRE.
-# Copyright (C) 2014-2018 CERN.
-#
-# INSPIRE is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# INSPIRE is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with INSPIRE. If not, see <http://www.gnu.org/licenses/>.
-#
-# In applying this license, CERN does not waive the privileges and immunities
-# granted to it by virtue of its status as an Intergovernmental Organization
-# or submit itself to any jurisdiction.
-
-sudo: required
-
 language: python
-
 dist: trusty
-services:
-  - docker
-
 python:
 - 3.6
-
-env:
-  global:
-    - DOCKER_DATA=/tmp/data
-
 before_install:
-  - travis_retry pip install --upgrade pip setuptools
-  - travis_retry pip install coveralls
-
+- travis_retry pip install --upgrade pip setuptools
+- travis_retry pip install coveralls
 install:
 - travis_retry pip install -e .[tests]
-
 script:
-    - chmod +x *.sh
-    - ./run-tests.sh
-
+- chmod +x *.sh
+- "./run-tests.sh"
 deploy:
   provider: pypi
-  user: #
+  user: inspirehep
   password:
-    secure: 
+    secure: QSPeMz4iQOMwqvLUwWpeJsvsTx7OdhdGVnvDClaMzb9nB2rYcXVY9j9rr/0jg+ocYPcv4yxIa7yxHPf/w0Gv2J3l6A1KWsuk94ZfMnAHvDspytTb4KSt/pqZ/QUoLjUn8SvmnJR3ifZeBi55PFwTpoS/iMI1VuRRi9kFNkNodavct/f8MPMVDvpoqHp8IfA/WSIZ8w0HXLYAia1HI9qVnZzs9OeMfpWVkfPbh2F1VJpDzkFnP9989+21FlpoluKiRAGZzC3kfqNCtPTujXqvsroToe/LR4XEnk27YDdZ4KEXKE8g23/wtou//PZV1Ohd5nz4cPaada7y76mHHhdr76O7OMlaFzY6UZdZe0dqpyfRk5HISQm3/BgjlMSdus8dSc8iakQduX8gHuf1vSDga2aJKespL6lPd46YWAH/y+lZKZ18DEdIEJIBxLcWS8Q1sEE6lUrVnP6ykI5R1FCZoJ7tNKNwaxCcGEqYf1WtYbpcFt5uEij13DErFVDWomauvfXcWN7qPOqLxNfA9IBcPHdm9k+GDVq6AcujcYbMQzi8n40/K5n7D7Ij2xZqp6F1obGE/3GM0t61f6fdeo2dCmcgUjhaiMsftixmi2xLqmUFezvDUBQ92Lq19MiQmFAkX21iH3jaGd/vwFKENGMfw5eD9WDBaMRtCDGA8dTHEKo=
   on:
     branch: master
-
 after_deploy:
-    - ./deploy_to_openshift.sh
+- "./deploy_to_openshift.sh"
+env:
+  global:
+  #DEPLOY_TOKEN
+  - secure: iE2eL+kq5mddntryu73RI1eLSH4yjGSMzm4BmDPasZHJWlzcTn25wUPQpTD+xF5n52DuKzbuEqTYmJVbiHt2gLPkFfRKRg7ZJcjNfzV47sduerwehRqXW7LJHBHtW4Zwsy2i5k4Ha5wDLLHzr3HL7hwu3Mu2TF2VKm2bGx1IIk63RN0HrawHKkoi/biKA88DCsMCXz4LlblvWEARgAorzxF7at+om4BrQaCdrOz3f036dUuC+z0ITDH2hM8HFlNkb+vvyEvYyWExqqpBC7YXe1X86ItoEr+y0Oo2ojtn+meqD1johr9I+kCOeuITAN8AeS+4dnVH4CEHfb6Fa3MzcSwb7nkHNYyEE7xcHXTfLdzUtDc4v15c2dFCH7YcN3btS30k3U+5pYmCWRPZlPxa92aVWB0wD1UYREa304NirnLId6kMJEKeIB6uFzqaFrLKz7RXKRjUARuhYHV1pFMo5f4sYkYx95AbQYJfZQi+HmTk7X3TAlIKz/xutevsiH8nQDEJYIfnRYyEx4fhkwaYw7PN9MjBsd2ww7ssYz03PaWEIJF0Ib+PZA8Z6KPha3Lc+PQqIzaGUfyT+jD0rO86J5E1dq1pPslPpCNNAnGm49H5GInpBSwnfTWdmDoqyEnS8t495uCq1No6WWz4SuGmX0X2x5ugsKikOQQe+sxNpnc=
+  #DEPLOY_URL
+  - secure: YBs1O1ghospU7PhRVQgTIkgtRbNG4Fxfe/H1fNWyb7NbIegZ5O9x7zb2vjDuY3M+stpxNTCs6V0m4IxaG/3wJtcEhJBUC1BJ3khN4kaLp+EDaVuI7mHEFnYiPPsRLVGkPDYTH25IpNKl/67XirnydAYeF0TsP1iRhRQyV9u4cu+WwmTMauT1Ye/bXvd4FU6vuUb6uyNcgYNNXHO1rUOWwiwcm2slB7vAu3UBCesGsmqoFK73+uq9dXv6b/b8z7f8ZnvPvBtyRRQk3qbhafLVH3HvWWXdgO27lCqZpKJbeg775WKnsvmmrFZvGKzpZeRo4ZPTNWSWvCz0KjfVQtVGdA9rEwRb/NxD24NEAsuymSDNW5qbKZXQiGGezKxAwTvuMd3OjoNdWU3qUF7+z23vlsxSRG7HB4qKoC401tAM1n2i5ys4YGGxsf1fGvJMGIoBGFGwQR8CyUXUIWLx+qaIksed0m+9VRPIPvXGmvANlfX87ucsRZJrS9VrioejwTvsOKsLf4Exn0/+p0FNcHSeEhBPzO5xGlfuwjnwRDKtlBRbP0VkPNhXwKXMaPP6zjBofIB0Loq0VNMLbGbUh7kMqCpQmdn82E6BjYQnfIyXJiBLXHZgqqOZlbRxHABFxS9e5e27xFMGKgzFEFDwWoeavU/pDywTNbvf/rt+1kqDJ2c=
