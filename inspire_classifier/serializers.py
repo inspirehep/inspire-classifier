@@ -20,14 +20,16 @@
 # granted to it by virtue of its status as an Intergovernmental Organization
 # or submit itself to any jurisdiction.
 
-from __future__ import absolute_import, division, print_function
-
 from marshmallow import Schema, fields
 from marshmallow.validate import OneOf
 
 
+class ScoreSchema(Schema):
+    core = fields.Float(attribute='rejected', required=True)
+    non_core = fields.Float(attribute='non_core', required=True)
+    rejected = fields.Float(attribute='core', required=True)
+
+
 class ClassifierOutputSerializer(Schema):
-    prediction = fields.Str(validate=OneOf(['core', 'non-core', 'rejected']), required=True)
-    score1 = fields.Float(attribute='score_a', required=True)
-    score2 = fields.Float(attribute='score_b', required=True)
-    score3 = fields.Float(attribute='score_c', required=True)
+    prediction = fields.Str(validate=OneOf(['core', 'non_core', 'rejected']), required=True)
+    scores = fields.Nested(ScoreSchema)

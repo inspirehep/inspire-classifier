@@ -20,40 +20,36 @@
 # granted to it by virtue of its status as an Intergovernmental Organization
 # or submit itself to any jurisdiction.
 
-from __future__ import absolute_import, division, print_function
-
 import json
+from math import isclose
 
 
 def test_health_check(app_client):
     assert app_client.get('/api/health').status_code == 200
 
 
-def test_classifier_accepts_only_post(app_client):
+def test_classifier_accepts_only_post(app, app_client, trained_pipeline):
     assert app_client.post('/api/classifier', data=dict(title='foo bar', abstract='foobar foobar')).status_code == 200
     assert app_client.get('/api/classifier').status_code == 405
 
 
-def test_classifier(app_client):
+def test_classifier(app, app_client, trained_pipeline):
     response = app_client.post('/api/classifier', data=dict(title='foo bar', abstract='foobar foobar'))
 
     result = json.loads(response.data)
 
-    expected = {
-        "prediction": "core",
-        "score1": 0.1,
-        "score2": 0.2,
-        "score3": 0.7,
-    }
-
     assert response.status_code == 200
-    assert expected == result
+    assert set(result.keys()) == {'prediction', 'scores'}
+    assert result['prediction'] in {'rejected', 'non_core', 'core'}
+    assert set(result['scores'].keys()) == {'rejected', 'non_core', 'core'}
+    assert isclose(result['scores']['rejected'] + result['scores']['non_core'] + result['scores']['core'], 1.0,
+                   abs_tol=1e-2)
 
 
-def test_classifier_serializes_input(app_client):
+def test_classifier_serializes_input(app, app_client, trained_pipeline):
     assert app_client.post('/api/classifier', data=dict(title='foo bar')).status_code == 422
     assert app_client.post('/api/classifier', data=dict(abstract='foo bar')).status_code == 422
 
 
-def test_classifier_accepts_extra_fields(app_client):
+def test_classifier_accepts_extra_fields(app, app_client, trained_pipeline):
     assert app_client.post('/api/classifier', data=dict(title='foo bar', abstract='foo bar', author='foo')).status_code == 200
