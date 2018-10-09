@@ -24,8 +24,9 @@ from __future__ import absolute_import, division, print_function
 
 import datetime
 
-from flask import Flask, jsonify, request, Response
-from marshmallow.exceptions import ValidationError
+from flask import Flask, jsonify, Response
+from flask_apispec import use_kwargs, marshal_with, FlaskApiSpec
+from marshmallow import fields
 
 from . import serializers
 from .domain.models import CoreClassifier
@@ -44,38 +45,31 @@ class JsonResponse(Response):
 classifier = CoreClassifier()
 Flask.response_class = JsonResponse
 app = Flask(__name__)
+docs = FlaskApiSpec(app)
 
 
 @app.route("/api/health")
 def date():
-    """Basic endpoint that returns the date, used to check if everything is up and working"""
+    """Basic endpoint that returns the date, used to check if everything is up and working."""
     now = datetime.datetime.now()
     return jsonify(now)
 
 
+docs.register(date)
+
+
 @app.route("/api/classifier", methods=["POST"])
-def core_classifier():
-    """Endpoint for the CORE classifier.
+@use_kwargs({'title': fields.Str(required=True), 'abstract': fields.Str(required=True)})
+@marshal_with(serializers.ClassifierOutputSerializer)
+def core_classifier(**kwargs):
+    """Endpoint for the CORE classifier."""
 
-    Accepts only POST requests, as we have to send data (title and abstract) to the classifier.
+    classifier.predict(kwargs['title'], kwargs['abstract'])
 
-    Returns an array with three float values that correspond to the probability of the record being Rejected, Non-Core and Core."""
+    return classifier
 
-    input_serializer = serializers.ClassifierInputSerializer()
-    output_serializer = serializers.ClassifierOutputSerializer()
 
-    try:
-        data = input_serializer.load(request.get_json(force=True))
-    except ValidationError as exc:
-        return {
-            "errors": [
-                exc.messages
-            ]
-        }, 400
-
-    classifier.predict(data['title'], data['abstract'])
-
-    return output_serializer.dump(classifier)
+docs.register(core_classifier)
 
 
 @app.errorhandler(404)

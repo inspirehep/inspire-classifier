@@ -22,17 +22,12 @@
 
 from __future__ import absolute_import, division, print_function
 
-from marshmallow import Schema, fields, INCLUDE
-
-
-class ClassifierInputSerializer(Schema):
-    class Meta:
-        unknown = INCLUDE
-    title = fields.Str(required=True)
-    abstract = fields.Str(required=True)
+from marshmallow import Schema, fields
+from marshmallow.validate import OneOf
 
 
 class ClassifierOutputSerializer(Schema):
-    score1 = fields.Float(attribute='score_a', required=True)
+    prediction = fields.Str(validate=OneOf(['core', 'non-core', 'rejected']), required=True)
+    score1 = fields.Float(attribute='score_b', required=True)
     score2 = fields.Float(attribute='score_b', required=True)
     score3 = fields.Float(attribute='score_c', required=True)
