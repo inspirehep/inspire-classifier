@@ -42,44 +42,43 @@ class JsonResponse(Response):
         return super(JsonResponse, cls).force_type(rv, environ)
 
 
-classifier = CoreClassifier()
-Flask.response_class = JsonResponse
-app = Flask(__name__)
-docs = FlaskApiSpec(app)
+def create_app():
+    classifier = CoreClassifier()
+    Flask.response_class = JsonResponse
+    app = Flask(__name__)
+    docs = FlaskApiSpec(app)
 
+    @app.route("/api/health")
+    def date():
+        """Basic endpoint that returns the date, used to check if everything is up and working."""
+        now = datetime.datetime.now()
+        return jsonify(now)
 
-@app.route("/api/health")
-def date():
-    """Basic endpoint that returns the date, used to check if everything is up and working."""
-    now = datetime.datetime.now()
-    return jsonify(now)
+    docs.register(date)
 
+    @app.route("/api/classifier", methods=["POST"])
+    @use_kwargs({'title': fields.Str(required=True), 'abstract': fields.Str(required=True)})
+    @marshal_with(serializers.ClassifierOutputSerializer)
+    def core_classifier(**kwargs):
+        """Endpoint for the CORE classifier."""
 
-docs.register(date)
+        classifier.predict(kwargs['title'], kwargs['abstract'])
 
+        return classifier
 
-@app.route("/api/classifier", methods=["POST"])
-@use_kwargs({'title': fields.Str(required=True), 'abstract': fields.Str(required=True)})
-@marshal_with(serializers.ClassifierOutputSerializer)
-def core_classifier(**kwargs):
-    """Endpoint for the CORE classifier."""
+    docs.register(core_classifier)
 
-    classifier.predict(kwargs['title'], kwargs['abstract'])
+    return app
 
-    return classifier
-
-
-docs.register(core_classifier)
-
-
-@app.errorhandler(404)
-def page_not_found(e):
-    return {
-        "errors": [
-            str(e)
-        ]
-    }, 404
+    @app.errorhandler(404)
+    def page_not_found(e):
+        return {
+            "errors": [
+                str(e)
+            ]
+        }, 404
 
 
 if __name__ == '__main__':
+    app = create_app()
     app.run(host='0.0.0.0')
