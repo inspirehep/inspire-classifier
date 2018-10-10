@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of INSPIRE.
-# Copyright (C) 2014-2018 CERN.
+# Copyright (C) 2014-2017 CERN.
 #
 # INSPIRE is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -22,12 +22,22 @@
 
 from __future__ import absolute_import, division, print_function
 
-from marshmallow import Schema, fields
-from marshmallow.validate import OneOf
+import pytest
+from inspire_classifier.app import create_app
 
 
-class ClassifierOutputSerializer(Schema):
-    prediction = fields.Str(validate=OneOf(['core', 'non-core', 'rejected']), required=True)
-    score1 = fields.Float(attribute='score_a', required=True)
-    score2 = fields.Float(attribute='score_b', required=True)
-    score3 = fields.Float(attribute='score_c', required=True)
+@pytest.fixture(autouse=True, scope='session')
+def app():
+    app = create_app()
+    with app.app_context():
+        yield app
+
+
+# TODO: all fixtures using ``app`` must be replaced by ones that use ``isolated_app``.
+@pytest.fixture()
+def app_client(app):
+    """Flask test client for the application.
+    See: http://flask.pocoo.org/docs/0.12/testing/#keeping-the-context-around.
+    """
+    with app.test_client() as client:
+        yield client

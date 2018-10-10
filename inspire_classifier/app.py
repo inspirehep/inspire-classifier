@@ -24,8 +24,9 @@ from __future__ import absolute_import, division, print_function
 
 import datetime
 
-from flask import Flask, jsonify, request, Response
-from marshmallow.exceptions import ValidationError
+from flask import Flask, jsonify, Response
+from flask_apispec import use_kwargs, marshal_with, FlaskApiSpec
+from marshmallow import fields
 
 from . import serializers
 from .domain.models import CoreClassifier
@@ -41,51 +42,43 @@ class JsonResponse(Response):
         return super(JsonResponse, cls).force_type(rv, environ)
 
 
-classifier = CoreClassifier()
-Flask.response_class = JsonResponse
-app = Flask(__name__)
+def create_app():
+    classifier = CoreClassifier()
+    Flask.response_class = JsonResponse
+    app = Flask(__name__)
+    docs = FlaskApiSpec(app)
 
+    @app.route("/api/health")
+    def date():
+        """Basic endpoint that returns the date, used to check if everything is up and working."""
+        now = datetime.datetime.now()
+        return jsonify(now)
 
-@app.route("/api/health")
-def date():
-    """Basic endpoint that returns the date, used to check if everything is up and working"""
-    now = datetime.datetime.now()
-    return jsonify(now)
+    docs.register(date)
 
+    @app.route("/api/classifier", methods=["POST"])
+    @use_kwargs({'title': fields.Str(required=True), 'abstract': fields.Str(required=True)})
+    @marshal_with(serializers.ClassifierOutputSerializer)
+    def core_classifier(**kwargs):
+        """Endpoint for the CORE classifier."""
 
-@app.route("/api/classifier", methods=["POST"])
-def core_classifier():
-    """Endpoint for the CORE classifier.
+        classifier.predict(kwargs['title'], kwargs['abstract'])
 
-    Accepts only POST requests, as we have to send data (title and abstract) to the classifier.
+        return classifier
 
-    Returns an array with three float values that correspond to the probability of the record being Rejected, Non-Core and Core."""
+    docs.register(core_classifier)
 
-    input_serializer = serializers.ClassifierInputSerializer()
-    output_serializer = serializers.ClassifierOutputSerializer()
+    return app
 
-    try:
-        data = input_serializer.load(request.get_json(force=True))
-    except ValidationError as exc:
+    @app.errorhandler(404)
+    def page_not_found(e):
         return {
             "errors": [
-                exc.messages
+                str(e)
             ]
-        }, 400
-
-    classifier.predict(data['title'], data['abstract'])
-
-    return output_serializer.dump(classifier)
-
-
-@app.errorhandler(404)
-def page_not_found(e):
-    return {
-        "errors": [
-            str(e)
-        ]
-    }, 404
+        }, 404
 
 
 if __name__ == '__main__':
+    app = create_app()
     app.run(host='0.0.0.0')

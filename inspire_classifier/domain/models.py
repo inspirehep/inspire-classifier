@@ -25,11 +25,13 @@ from __future__ import absolute_import, division, print_function
 
 class CoreClassifier(object):
     def __init__(self):
+        self.prediction = None
         self.score_a = None
         self.score_b = None
         self.score_c = None
 
     def predict(self, title, abstract):
+        self.prediction = 'core'
         self.score_a = 0.1
         self.score_b = 0.2
         self.score_c = 0.7
