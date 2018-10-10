@@ -65,7 +65,7 @@ class LanguageModel(object):
         self.data_itos = pickle.load(open(data_itos_path, 'rb'))
         self.vocabulary_size = len(self.data_itos)
 
-        bptt = 70
+        number_of_backpropagation_through_time_steps = 70
         number_of_hidden_units = 1150
         number_of_layers = 3
         self.embedding_size = 400
@@ -76,10 +76,10 @@ class LanguageModel(object):
         val_lm = np.load(validation_data_ids_path)
         val_lm = np.concatenate(val_lm)
 
-        trn_dl = LanguageModelLoader(trn_lm, batch_size, bptt)
-        val_dl = LanguageModelLoader(val_lm, batch_size, bptt)
+        trn_dl = LanguageModelLoader(trn_lm, batch_size, number_of_backpropagation_through_time_steps)
+        val_dl = LanguageModelLoader(val_lm, batch_size, number_of_backpropagation_through_time_steps)
         model = LanguageModelData(language_model_model_dir, 1, self.vocabulary_size, trn_dl, val_dl, bs = batch_size,
-                               bptt = bptt)
+                               bptt = number_of_backpropagation_through_time_steps)
 
         drops = np.array([0.25, 0.1, 0.2, 0.02, 0.15]) * dropmult
 
@@ -112,12 +112,11 @@ class LanguageModel(object):
 
         self.learner.model.load_state_dict(wgts)
 
-    def train(self, finetuned_language_model_save_path, finetuned_language_model_encoder_save_path,
-              learning_rate = 1e-3, weight_decay = 1e-7, cycle_length = 15):
+    def train(self, finetuned_language_model_encoder_save_path, learning_rate = 1e-3, weight_decay = 1e-7,
+              cycle_length = 15):
 
         self.learner.unfreeze()
         self.learner.fit(learning_rate, n_cycle = 1, wds = weight_decay, use_clr=(20,10), cycle_len= cycle_length)
-        save_model(self.learner.model, finetuned_language_model_save_path)
         save_model(self.learner.model[0], finetuned_language_model_encoder_save_path)
 
 
@@ -158,16 +157,18 @@ class Classifier(object):
 
         dps = np.array([0.4, 0.5, 0.05, 0.3, 0.4]) * dropmult
 
-        bptt = 70
+        number_of_back_propagation_through_time_steps = 70
         number_of_hidden_units = 1150
         number_of_layers = 3
         embedding_size = 400
         opt_fn = partial(optim.Adam, betas=(0.8, 0.99))
 
-        self.model = get_rnn_classifier(bptt, 20 * bptt, number_of_classes, self.vocabulary_size, emb_sz = embedding_size,
-                               n_hid = number_of_hidden_units, n_layers = number_of_layers, pad_token = 1,
-                               layers = [embedding_size * 3, 50, number_of_classes], drops = [dps[4], 0.1],
-                               dropouti=dps[0], wdrop=dps[1], dropoute=dps[2], dropouth=dps[3])
+        self.model = get_rnn_classifier(number_of_back_propagation_through_time_steps,
+                                        20 * number_of_back_propagation_through_time_steps, number_of_classes,
+                                        self.vocabulary_size, emb_sz = embedding_size, n_hid = number_of_hidden_units,
+                                        n_layers = number_of_layers, pad_token = 1,
+                                        layers = [embedding_size * 3, 50, number_of_classes], drops = [dps[4], 0.1],
+                                        dropouti=dps[0], wdrop=dps[1], dropoute=dps[2], dropouth=dps[3])
 
         self.learner = RNN_Learner(md, TextModel(to_gpu(self.model)), opt_fn = opt_fn)
         self.learner.reg_fn = partial(seq2seq_reg, alpha=2, beta=1)
