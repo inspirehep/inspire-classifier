@@ -37,6 +37,7 @@ setup_requires = [
 
 install_requires = [
     'Flask~=1.0,>=1.0.2',
+    'flask-apispec~=0.0,>=0.7.0',
     'marshmallow~=3.0.0b13,>=3.0.0b13'
 ]
 
