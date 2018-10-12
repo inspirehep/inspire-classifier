@@ -25,6 +25,7 @@
 from __future__ import absolute_import, division, print_function
 
 from setuptools import find_packages, setup
+from setuptools.command.install import install
 
 
 url = 'https://github.com/inspirehep/inspire-classifier'
@@ -36,9 +37,18 @@ setup_requires = [
 ]
 
 install_requires = [
+    'fastai==0.7.0',
     'Flask~=1.0,>=1.0.2',
     'flask-apispec~=0.0,>=0.7.0',
-    'marshmallow~=3.0.0b13,>=3.0.0b13'
+    'marshmallow~=3.0.0b13,>=3.0.0b13',
+    'numpy~=1.15,>=1.15.0',
+    'spacy~=2.0,>=2.0.0',
+    'en_core_web_sm==2.0.0',
+    'torchtext==0.2.3'
+]
+
+dependency_links = [
+    'https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-2.0.0/en_core_web_sm-2.0.0.tar.gz'
 ]
 
 docs_require = []
@@ -79,6 +89,7 @@ setup(
     long_description=readme,
     setup_requires=setup_requires,
     install_requires=install_requires,
+    dependency_links=dependency_links,
     tests_require=tests_require,
     extras_require=extras_require,
     classifiers=[

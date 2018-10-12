@@ -22,36 +22,27 @@
 
 """Classifier Configuration."""
 
-from __future__ import absolute_import, division, print_function
-
-import os
-
 
 CLASSIFIER_MAXIMUM_VOCABULARY_SIZE = 60000
 CLASSIFIER_MINIMUM_WORD_FREQUENCY = 2
 CLASSIFIER_VALIDATION_DATA_FRACTION = 0.1
-CLASSIFIER_CLASSIFICATION_CLASSES = ['Rejected', 'NonCore', 'Core']
 CLASSIFIER_LANGUAGE_MODEL_CYCLE_LENGTH = 15
 CLASSIFIER_CLASSIFIER_CYCLE_LENGTH = 14
+CLASSIFIER_LANGUAGE_MODEL_BATCH_SIZE = 32
+CLASSIFIER_CLASSIFIER_BATCH_SIZE = 10
+CLASSIFIER_CUDA_DEVICE_ID = 0
 
-### FIXME: Check and change the classifier base path
-CLASSIFIER_BASE_PATH = os.path.join(app.instance_path, 'inspire-classifier')
-CLASSIFIER_DATA_DIR = os.path.join(CLASSIFIER_BASE_PATH, 'data')
-CLASSIFIER_MODELS_DIR = os.path.join(CLASSIFIER_BASE_PATH, 'models')
-CLASSIFIER_LANGUAGE_MODEL_DIR = os.path.join(CLASSIFIER_MODELS_DIR, 'language_model')
-CLASSIFIER_CLASSIFIER_MODEL_DIR = os.path.join(CLASSIFIER_MODELS_DIR, 'classifier_model')
-CLASSIFIER_LANGUAGE_MODEL_DATA_DIR = os.path.join(CLASSIFIER_DATA_DIR, 'language_model_data')
-CLASSIFIER_CLASSIFIER_DATA_DIR = os.path.join(CLASSIFIER_DATA_DIR, 'classifier_data')
+CLASSIFIER_DATA_PATH = 'data'
+CLASSIFIER_LANGUAGE_MODEL_PATH = 'models/language_model'
+CLASSIFIER_CLASSIFIER_MODEL_PATH = 'models/classifier_model'
+CLASSIFIER_LANGUAGE_MODEL_DATA_PATH = 'data/language_model_data'
+CLASSIFIER_CLASSIFIER_DATA_PATH = 'data/classifier_data'
+CLASSIFIER_DATAFRAME_PATH = 'data/inspire_data.df'
+CLASSIFIER_PRETRAINED_LANGUAGE_MODEL_PATH = 'models/language_model/wikitext_103/fwd_wt103.h5'
+CLASSIFIER_FINETUNED_LANGUAGE_MODEL_ENCODER_PATH = 'models/language_model/finetuned_language_model_encoder.h5'
+CLASSIFIER_TRAINED_CLASSIFIER_PATH = 'models/classifier_model/trained_classifier_model.h5'
+CLASSIFIER_WIKITEXT103_ITOS_PATH = 'models/language_model/wikitext_103/itos_wt103.pkl'
+CLASSIFIER_DATA_ITOS_PATH = 'data/inspire_data_itos.pkl'
 
-CLASSIFIER_DATAFRAME_PATH =  os.path.join(CLASSIFIER_DATA_DIR, 'inspire_data.df')
-CLASSIFIER_PRETRAINED_LANGUAGE_MODEL_PATH = os.path.join(
-    CLASSIFIER_LANGUAGE_MODEL_DIR, 'wikitext_103', 'fwd_wt103.h5')
-CLASSIFIER_FINETUNED_LANGUAGE_MODEL_ENCODER_PATH = os.path.join(
-    CLASSIFIER_LANGUAGE_MODEL_DIR, 'finetuned_language_encoder_model.h5')
-CLASSIFIER_TRAINED_CLASSIFIER_PATH = os.path.join(
-    CLASSIFIER_CLASSIFIER_MODEL_DIR, 'trained_classifier_model.h5')
-CLASSIFIER_WIKITEXT103_ITOS_PATH = os.path.join(
-    CLASSIFIER_LANGUAGE_MODEL_DIR, 'wikitext_103', 'itos_wt103.pkl')
-CLASSIFIER_DATA_ITOS_PATH = os.path.join(CLASSIFIER_DATA_DIR, 'data_itos.pkl')
 CLASSIFIER_WIKITEXT103_LANGUAGE_MODEL_URL = 'http://files.fast.ai/models/wt103/fwd_wt103.h5'
 CLASSIFIER_WIKITEXT103_ITOS_URL = 'http://files.fast.ai/models/wt103/itos_wt103.pkl'

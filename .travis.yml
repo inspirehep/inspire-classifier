@@ -6,7 +6,7 @@ before_install:
 - travis_retry pip install --upgrade pip setuptools
 - travis_retry pip install coveralls
 install:
-- travis_retry pip install -e .[tests]
+- travis_retry pip install --progress-bar off --process-dependency-links -e .[tests]
 script:
 - "./run-tests.sh"
 deploy:

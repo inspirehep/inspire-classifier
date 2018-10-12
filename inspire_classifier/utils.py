@@ -20,6 +20,12 @@
 # granted to it by virtue of its status as an Intergovernmental Organization
 # or submit itself to any jurisdiction.
 
-"""Classifier Core ML."""
+from flask import current_app
+from pathlib import Path
 
-from __future__ import absolute_import, division, print_function
+
+def path_for(name):
+    base_path = Path(current_app.config.get('CLASSIFER_BASE_PATH') or current_app.instance_path)
+    config_key = f'CLASSIFIER_{name}_PATH'.upper()
+
+    return base_path / current_app.config[config_key]

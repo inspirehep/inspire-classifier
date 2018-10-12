@@ -20,16 +20,14 @@
 # granted to it by virtue of its status as an Intergovernmental Organization
 # or submit itself to any jurisdiction.
 
-from __future__ import absolute_import, division, print_function
-
 import datetime
 
 from flask import Flask, jsonify, Response
 from flask_apispec import use_kwargs, marshal_with, FlaskApiSpec
+from inspire_classifier.api import predict_coreness
 from marshmallow import fields
 
 from . import serializers
-from .domain.models import CoreClassifier
 
 
 class JsonResponse(Response):
@@ -43,9 +41,10 @@ class JsonResponse(Response):
 
 
 def create_app():
-    classifier = CoreClassifier()
     Flask.response_class = JsonResponse
     app = Flask(__name__)
+    app.config['CLASSIFIER_BASE_PATH'] = app.instance_path
+    app.config.from_object('inspire_classifier.config')
     docs = FlaskApiSpec(app)
 
     @app.route("/api/health")
@@ -62,9 +61,7 @@ def create_app():
     def core_classifier(**kwargs):
         """Endpoint for the CORE classifier."""
 
-        classifier.predict(kwargs['title'], kwargs['abstract'])
-
-        return classifier
+        return predict_coreness(kwargs['title'], kwargs['abstract'])
 
     docs.register(core_classifier)
 
