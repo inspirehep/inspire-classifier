@@ -23,4 +23,4 @@
 set -e
 
 flake8 inspire_classifier tests
-py.test -s tests
+py.test tests
