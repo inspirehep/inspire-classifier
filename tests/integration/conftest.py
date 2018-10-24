@@ -43,7 +43,6 @@ def app():
         app.config['CLASSIFIER_CLASSIFIER_CYCLE_LENGTH'] = 1
         app.config['CLASSIFIER_LANGUAGE_MODEL_BATCH_SIZE'] = 10
         app.config['CLASSIFIER_CLASSIFIER_BATCH_SIZE'] = 10
-        app.config['CLASSIFIER_CUDA_DEVICE_ID'] = -1
         app.config['CLASSIFIER_VALIDATION_DATA_FRACTION'] = 0.2
         yield app
 
