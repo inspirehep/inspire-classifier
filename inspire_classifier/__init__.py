@@ -21,5 +21,3 @@
 # or submit itself to any jurisdiction.
 
 """INSPIRE module aimed at automatically classifying the new papers that are added to INSPIRE, such as if they are core or not, or the arXiv category corresponding to each of them."""
-
-from __future__ import absolute_import, division, print_function

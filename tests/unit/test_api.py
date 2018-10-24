@@ -20,8 +20,6 @@
 # granted to it by virtue of its status as an Intergovernmental Organization
 # or submit itself to any jurisdiction.
 
-from __future__ import absolute_import, division, print_function
-
 from inspire_classifier import serializers
 
 from marshmallow.exceptions import ValidationError
@@ -34,9 +32,11 @@ def test_output_serializer():
 
     scores = {
         "prediction": "core",
-        "score1": 0.1,
-        "score2": 0.2,
-        "score3": 0.7,
+        "scores": {
+            "rejected": 0.1,
+            "non_core": 0.2,
+            "core": 0.7
+        }
     }
 
     assert output_serializer.load(scores)
@@ -47,8 +47,10 @@ def test_output_serializer_raises_exception():
 
     scores = {
         "prediction": "core",
-        "score1": 0.1,
-        "score2": 0.2,
+        "scores": {
+            "rejected": 0.1,
+            "non_core": 0.2
+        }
     }
 
     with pytest.raises(ValidationError):
@@ -60,10 +62,12 @@ def test_output_serializer_does_not_accept_extra_fields():
 
     scores = {
         "prediction": "core",
-        "score1": 0.1,
-        "score2": 0.2,
-        "score3": 0.7,
-        "score4": 0.0,
+        "scores": {
+            "rejected": 0.1,
+            "non_core": 0.2,
+            "core": 0.7,
+            "score4": 0.0
+        }
     }
 
     with pytest.raises(ValidationError):
@@ -75,9 +79,11 @@ def test_output_accepts_only_certain_values_for_prediction():
 
     scores = {
         "prediction": "non-rejected",
-        "score1": 0.1,
-        "score2": 0.2,
-        "score3": 0.7,
+        "scores": {
+            "rejected": 0.1,
+            "non_core": 0.2,
+            "core": 0.7
+        }
     }
 
     with pytest.raises(ValidationError):
