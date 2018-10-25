@@ -25,9 +25,9 @@ from marshmallow.validate import OneOf
 
 
 class ScoreSchema(Schema):
-    core = fields.Float(attribute='rejected', required=True)
+    rejected = fields.Float(attribute='rejected', required=True)
     non_core = fields.Float(attribute='non_core', required=True)
-    rejected = fields.Float(attribute='core', required=True)
+    core = fields.Float(attribute='core', required=True)
 
 
 class ClassifierOutputSerializer(Schema):
