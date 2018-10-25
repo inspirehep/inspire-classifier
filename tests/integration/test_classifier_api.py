@@ -123,7 +123,7 @@ def test_train_and_save_classifier(trained_pipeline):
     assert path_for('trained_classifier').exists()
 
 
-def test_predict_coreness(app, trained_pipeline):
+def test_predict_coreness(trained_pipeline):
     assert path_for('data_itos').exists()
     assert path_for('trained_classifier').exists()
     output_dict = predict_coreness(title=TEST_TITLE, abstract=TEST_ABSTRACT)
