@@ -73,14 +73,15 @@ class Mock_RNN_Learner(RNN_Learner):
             return self._fit_result
 
 
+@pytest.fixture(scope='session')
 @patch(
     'fastai.text.RNN_Learner', Mock_RNN_Learner
 )
 @patch(
     'inspire_classifier.domain.models.RNN_Learner', Mock_RNN_Learner
 )
-@pytest.fixture(scope='session')
-def trained_pipeline(app):
+def trained_pipeline(app, tmpdir_factory):
+    app.config['CLASSIFIER_BASE_PATH'] = str(tmpdir_factory)
     create_directories()
     shutil.copy(Path(__file__).parent / 'fixtures' / 'inspire_test_data.df', path_for('dataframe'))
     train()
