@@ -29,12 +29,12 @@ def test_health_check(app_client):
 
 
 def test_classifier_accepts_only_post(app_client, trained_pipeline):
-    assert app_client.post('/api/classifier', data=dict(title='foo bar', abstract='foobar foobar')).status_code == 200
-    assert app_client.get('/api/classifier').status_code == 405
+    assert app_client.post('/api/predict/coreness', data=dict(title='foo bar', abstract='foobar foobar')).status_code == 200
+    assert app_client.get('/api/predict/coreness').status_code == 405
 
 
 def test_classifier(app_client, trained_pipeline):
-    response = app_client.post('/api/classifier', data=dict(title='foo bar', abstract='foobar foobar'))
+    response = app_client.post('/api/predict/coreness', data=dict(title='foo bar', abstract='foobar foobar'))
 
     result = json.loads(response.data)
 
@@ -47,9 +47,9 @@ def test_classifier(app_client, trained_pipeline):
 
 
 def test_classifier_serializes_input(app_client, trained_pipeline):
-    assert app_client.post('/api/classifier', data=dict(title='foo bar')).status_code == 422
-    assert app_client.post('/api/classifier', data=dict(abstract='foo bar')).status_code == 422
+    assert app_client.post('/api/predict/coreness', data=dict(title='foo bar')).status_code == 422
+    assert app_client.post('/api/predict/coreness', data=dict(abstract='foo bar')).status_code == 422
 
 
 def test_classifier_accepts_extra_fields(app_client, trained_pipeline):
-    assert app_client.post('/api/classifier', data=dict(title='foo bar', abstract='foo bar', author='foo')).status_code == 200
+    assert app_client.post('/api/predict/coreness', data=dict(title='foo bar', abstract='foo bar', author='foo')).status_code == 200

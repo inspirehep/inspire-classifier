@@ -55,7 +55,7 @@ def create_app():
 
     docs.register(date)
 
-    @app.route("/api/classifier", methods=["POST"])
+    @app.route("/api/predict/coreness", methods=["POST"])
     @use_kwargs({'title': fields.Str(required=True), 'abstract': fields.Str(required=True)})
     @marshal_with(serializers.ClassifierOutputSerializer)
     def core_classifier(**kwargs):
