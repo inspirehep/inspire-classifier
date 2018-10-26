@@ -44,7 +44,7 @@ Run the development server with:
 Example:
 
 .. highlight:: bash
-    $ curl -i http://127.0.0.1:5000/api/classifier --data "{\"title\": \"Alice In Wonderland\", \"abstract\": \"The reader is conveyed to Wonderland, a world that has no apparent connection with reality...\"}"
+    $ curl -i http://127.0.0.1:5000/api/predict/coreness --data "{\"title\": \"Alice In Wonderland\", \"abstract\": \"The reader is conveyed to Wonderland, a world that has no apparent connection with reality...\"}"
     HTTP/1.0 200 OK
     Content-Type: application/json
     Content-Length: 52
