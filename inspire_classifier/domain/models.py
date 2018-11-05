@@ -52,6 +52,9 @@ from fastai.text import (
 from functools import partial
 import numpy as np
 import pickle
+import re
+import spacy
+from spacy.symbols import ORTH
 
 
 class LanguageModel(object):
@@ -204,7 +207,7 @@ class Classifier(object):
 
         input_string = 'xbos xfld 1 ' + text
         texts = [input_string]
-        tokens = Tokenizer(lang='en_core_web_sm').proc_all_mp(partition_by_cores(texts), lang='en_core_web_sm')
+        tokens = FastLoadTokenizer(lang='en_core_web_sm').proc_all_mp(partition_by_cores(texts), lang='en_core_web_sm')
         encoded_tokens = [self.inspire_data_stoi[p] for p in tokens[0]]
         token_array = np.reshape(np.array(encoded_tokens), (-1, 1))
         token_array = Variable(torch.from_numpy(token_array))
@@ -220,3 +223,20 @@ def numpy_softmax(x):
     max_x = np.max(x, axis=1).reshape((-1, 1))
     exp_x = np.exp(x - max_x)
     return exp_x / np.sum(exp_x, axis=1).reshape((-1, 1))
+
+
+class FastLoadTokenizer(Tokenizer):
+    """
+    Tokenizer which doesn't load all spacy pipeline components.
+
+    The FastAI Tokenizer class loads all the pipeline components of the spacy model which significantly increases
+    loading time, especially when doing inference on CPU. This class inherits from the FastAI Tokenizer and overrides
+    the spacy.load method to disable loading of unnecessary pipeline components.
+
+    Further information: https://github.com/explosion/spaCy/issues/1725
+    """
+    def __init__(self, lang='en'):
+        self.re_br = re.compile(r'<\s*br\s*/?>', re.IGNORECASE)
+        self.tok = spacy.load(lang, disable=['ner', 'parser', 'tagger'])
+        for w in ('<eos>', '<bos>', '<unk>'):
+            self.tok.tokenizer.add_special_case(w, [{ORTH: w}])
