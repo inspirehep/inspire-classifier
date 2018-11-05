@@ -35,14 +35,12 @@ from fastai.text import (
     LanguageModelData,
     load_model,
     ModelData,
-    partition_by_cores,
     RNN_Learner,
     T,
     TextDataset,
     TextModel,
     to_gpu,
     to_np,
-    Tokenizer,
     save_model,
     seq2seq_reg,
     SortishSampler,
@@ -50,6 +48,7 @@ from fastai.text import (
     Variable
 )
 from functools import partial
+from inspire_classifier.utils import FastLoadTokenizer
 import numpy as np
 import pickle
 
@@ -147,6 +146,8 @@ class Classifier(object):
                                        dropouti=dropouts[0], wdrop=dropouts[1], dropoute=dropouts[2],
                                        dropouth=dropouts[3])
 
+        self.tokenizer = FastLoadTokenizer()
+
     def load_training_and_validation_data(self, training_data_ids_path, training_data_labels_path,
                                           validation_data_ids_path, validation_data_labels_path, classifier_data_dir,
                                           batch_size=10):
@@ -204,7 +205,7 @@ class Classifier(object):
 
         input_string = 'xbos xfld 1 ' + text
         texts = [input_string]
-        tokens = Tokenizer(lang='en_core_web_sm').proc_all_mp(partition_by_cores(texts), lang='en_core_web_sm')
+        tokens = self.tokenizer.proc_all(texts)
         encoded_tokens = [self.inspire_data_stoi[p] for p in tokens[0]]
         token_array = np.reshape(np.array(encoded_tokens), (-1, 1))
         token_array = Variable(torch.from_numpy(token_array))
