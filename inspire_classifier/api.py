@@ -184,7 +184,7 @@ def predict_coreness(title, abstract):
     """
     Predicts class-wise probabilities given the title and abstract.
     """
-    text = title + abstract
+    text = title + ' ' + abstract
     categories = ['rejected', 'non_core', 'core']
     try:
         classifier = Classifier(data_itos_path=path_for('data_itos'),
