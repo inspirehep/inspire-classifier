@@ -26,16 +26,14 @@
 
 
 import collections
+from fastai.text import partition_by_cores
 import html
+from inspire_classifier.utils import FastLoadTokenizer
 import numpy as np
 import pandas as pd
 import pickle
 import re
 import sklearn
-from fastai.text import (
-    Tokenizer,
-    partition_by_cores
-)
 
 
 BOS = 'xbos'  # beginning-of-sentence tag
@@ -164,7 +162,7 @@ def get_texts(df):
     texts = f'\n{BOS} {FLD} 1 ' + df[1].astype(str)
     texts = list(texts.apply(fixup).values)
 
-    tokens = Tokenizer(lang='en_core_web_sm').proc_all_mp(partition_by_cores(texts), lang='en_core_web_sm')
+    tokens = FastLoadTokenizer().proc_all_mp(partition_by_cores(texts))
     return tokens, list(labels)
 
 

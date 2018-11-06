@@ -25,7 +25,6 @@
 from __future__ import absolute_import, division, print_function
 
 from setuptools import find_packages, setup
-from setuptools.command.install import install
 
 
 url = 'https://github.com/inspirehep/inspire-classifier'
@@ -43,7 +42,6 @@ install_requires = [
     'marshmallow~=3.0.0b13,>=3.0.0b13',
     'numpy~=1.15,>=1.15.0',
     'spacy~=2.0,>=2.0.0',
-    'en_core_web_sm@https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-2.0.0/en_core_web_sm-2.0.0.tar.gz',
     'torchtext==0.2.3'
 ]
 
