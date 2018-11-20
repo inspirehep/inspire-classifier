@@ -56,8 +56,7 @@ def split_and_save_data_for_language_model_and_classifier(dataframe_path, langua
 
     # Shuffle the data
     inspire_data = inspire_data.sample(frac=1).reset_index(drop=True)
-    inspire_data.columns = ['text', 'labels']
-    # Swap the columns so that the labels are Column 0 and the text is Column 1
+    # Swap the columns so that the labels are Column 0 and the text is Column 1 (and remove any additional columns)
     inspire_data = inspire_data[['labels', 'text']]
 
     training_dataframe, validation_dataframe = sklearn.model_selection.train_test_split(
