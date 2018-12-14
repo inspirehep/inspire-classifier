@@ -35,7 +35,7 @@ from spacy.symbols import ORTH
 
 
 def path_for(name):
-    base_path = Path(current_app.config.get('CLASSIFER_BASE_PATH') or current_app.instance_path)
+    base_path = Path(current_app.config.get('CLASSIFIER_BASE_PATH') or current_app.instance_path)
     config_key = f'CLASSIFIER_{name}_PATH'.upper()
 
     return base_path / current_app.config[config_key]
