@@ -81,7 +81,7 @@ class Mock_RNN_Learner(RNN_Learner):
     'inspire_classifier.domain.models.RNN_Learner', Mock_RNN_Learner
 )
 def trained_pipeline(app, tmp_path_factory):
-    app.config['CLASSIFIER_BASE_PATH'] = tmp_path_factory
+    app.config['CLASSIFIER_BASE_PATH'] = tmp_path_factory.getbasetemp()
     create_directories()
     shutil.copy(Path(__file__).parent / 'fixtures' / 'inspire_test_data.df', path_for('dataframe'))
     train()
