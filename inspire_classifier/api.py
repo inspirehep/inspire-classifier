@@ -47,7 +47,7 @@ def create_directories():
     path_for('classifier_data').mkdir(parents=True, exist_ok=True)
     path_for('language_model_data').mkdir(parents=True, exist_ok=True)
     path_for('classifier_model').mkdir(parents=True, exist_ok=True)
-    (path_for('language_model') / 'wikitext_103').mkdir(exist_ok=True, parents=True)
+    (path_for('language_model') / 'wikitext_103').mkdir(parents=True, exist_ok=True)
 
 
 def preprocess_and_save_data():
@@ -61,7 +61,9 @@ def preprocess_and_save_data():
             val_fraction=current_app.config['CLASSIFIER_VALIDATION_DATA_FRACTION']
         )
     except IOError as error:
-        raise IOError('Training dataframe not found.') from error
+        raise IOError('Training dataframe not found. Make sure the file is present in the right directory. '
+                      'Please use the path specified in config.py for CLASSIFIER_DATAFRAME_PATH relative to the '
+                      'CLASSIFIER_BASE_PATH.') from error
 
     try:
         generate_and_save_language_model_tokens(language_model_data_dir=path_for('language_model_data'))
@@ -129,7 +131,8 @@ def finetune_and_save_language_model():
         language_model.train(finetuned_language_model_encoder_save_path=path_for('finetuned_language_model_encoder'),
                              cycle_length=current_app.config['CLASSIFIER_LANGUAGE_MODEL_CYCLE_LENGTH'])
     except IOError as error:
-        raise IOError('Unable to save the finetuned language model.') from error
+        raise IOError('Unable to save the finetuned language model. Please check that the language model data directory '
+                      'exists.') from error
 
 
 def train_and_save_classifier():

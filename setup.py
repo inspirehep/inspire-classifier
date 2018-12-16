@@ -36,6 +36,8 @@ setup_requires = [
 ]
 
 install_requires = [
+    'click~=7.0,>=7.0',
+    'click-spinner~=0.1,>=0.1.8',
     'fastai==0.7.0',
     'Flask~=1.0,>=1.0.2',
     'flask-apispec~=0.0,>=0.7.0',
@@ -97,4 +99,9 @@ setup(
         'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
+    entry_points={
+        'console_scripts': [
+            'inspire-classifier = inspire_classifier.cli:inspire_classifier'
+        ]
+    }
 )
