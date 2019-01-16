@@ -104,7 +104,7 @@ Combine the Core, Non-Core, and Rejected data
 
 The Core, Non-Core, and Rejected data can be combined by using the python script found at ``combine_core_noncore_rejected_data.py``. The different required files paths need to be specified in the file before running the script. Finally, this will produce the file *inspire_data.df* which is a Pandas DataFrame and which can be used for training and evaluation of the INSPIRE classifier. This file should be placed at the path specified in *inspire-classifier/inspire_classifier/config.py* in the variable *CLASSIFIER_DATAFRAME_PATH*.
 
-The resulting pandas dataframe will contain 4 columns: *abstract*, *title*, *text*, *labels*, where *text* is *title* and *abstract* concatenated by a whitespace in between. The classifier only requires the *text* and *labels* data to train, however, it's good practice to retain the *title* and *abstract* separately as well, since for now we are not separating *title* and *abstract* with an identifiable token during concatenation.
+The resulting pandas dataframe will contain 2 columns: *labels* and *text* where *text* is *title* and *abstract* concatenated with a *<ENDTITLE>* token in between.
 
 
 
@@ -119,3 +119,4 @@ The resulting pandas dataframe will contain 4 columns: *abstract*, *title*, *tex
     ::
 
         inspirehep shell
+
