@@ -66,10 +66,6 @@ core_df = pd.DataFrame(noncore_data())
 core_df['labels'] = 2
 
 inspire_data = pd.concat([rejected_df, noncore_df, core_df], ignore_index=True)
-#XXX: The below data concatenation method assumes the current title and abstrat
-#     combination approach i.e. using a simple whitespace. However, it's better
-#     to insert a special token such as ' <endTitle> ' instead of the single
-#     whitespace. This would require training our models again, as well as making
-#     changes in the predict_coreness API to make the text consistent with this.
-inspire_data['text'] = inspire_data['title'] + ' ' + inspire_data['abstract']
+inspire_data['text'] = inspire_data['title'] + ' <ENDTITLE> ' + inspire_data['abstract']
+inspire_data = inspire_data[['labels', 'text']]
 inspire_data.to_pickle(save_path)
