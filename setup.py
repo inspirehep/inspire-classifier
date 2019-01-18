@@ -40,7 +40,7 @@ install_requires = [
     'Flask~=1.0,>=1.0.2',
     'flask-apispec~=0.0,>=0.7.0',
     'marshmallow~=3.0.0b13,>=3.0.0b13',
-    'numpy~=1.15,>=1.15.0',
+    'numpy==1.15.4',
     'spacy~=2.0,>=2.0.0',
     'torchtext==0.2.3'
 ]
