@@ -53,31 +53,31 @@ def test_preprocess_and_save_data(app, trained_pipeline):
     # Test core/preprocessor:split_and_save_data_for_language_model_and_classifier
     classifier_training_csv = pd.read_csv(path_for('classifier_data') / 'training_data.csv')
     assert isclose(len(classifier_training_csv),
-                   len(dataframe) * (1 - app.config['CLASSIFIER_VALIDATION_DATA_FRACTION']), abs_tol=1)
+                   len(dataframe) * (1 - app.config['CLASSIFIER_VALIDATION_DATA_FRACTION']), abs_tol=2)
     classifier_validation_csv = pd.read_csv(path_for('classifier_data') / 'validation_data.csv')
     assert isclose(len(classifier_validation_csv), len(dataframe) * app.config['CLASSIFIER_VALIDATION_DATA_FRACTION'],
-                   abs_tol=1)
+                   abs_tol=2)
 
     language_model_training_csv = pd.read_csv(path_for('language_model_data') / 'training_data.csv')
     assert isclose(len(language_model_training_csv),
-                   len(dataframe) * (1 - app.config['CLASSIFIER_VALIDATION_DATA_FRACTION']), abs_tol=1)
+                   len(dataframe) * (1 - app.config['CLASSIFIER_VALIDATION_DATA_FRACTION']), abs_tol=2)
     language_model_validation_csv = pd.read_csv(path_for('language_model_data') / 'validation_data.csv')
     assert isclose(len(language_model_validation_csv),
-                   len(dataframe) * app.config['CLASSIFIER_VALIDATION_DATA_FRACTION'], abs_tol=1)
+                   len(dataframe) * app.config['CLASSIFIER_VALIDATION_DATA_FRACTION'], abs_tol=2)
 
     # Test core/preprocessor:generate_and_save_language_model_tokens
     language_model_training_tokens = np.load(path_for('language_model_data') / 'training_tokens.npy')
     assert isclose(len(language_model_training_tokens),
-                   len(dataframe) * (1 - app.config['CLASSIFIER_VALIDATION_DATA_FRACTION']), abs_tol=1)
+                   len(dataframe) * (1 - app.config['CLASSIFIER_VALIDATION_DATA_FRACTION']), abs_tol=2)
     language_model_validation_tokens = np.load(path_for('language_model_data') / 'validation_tokens.npy')
     assert isclose(len(language_model_validation_tokens),
-                   len(dataframe) * app.config['CLASSIFIER_VALIDATION_DATA_FRACTION'], abs_tol=1)
+                   len(dataframe) * app.config['CLASSIFIER_VALIDATION_DATA_FRACTION'], abs_tol=2)
     language_model_training_labels = np.load(path_for('language_model_data') / 'training_labels.npy')
     assert isclose(len(language_model_training_labels),
-                   len(dataframe) * (1 - app.config['CLASSIFIER_VALIDATION_DATA_FRACTION']), abs_tol=1)
+                   len(dataframe) * (1 - app.config['CLASSIFIER_VALIDATION_DATA_FRACTION']), abs_tol=2)
     language_model_validation_labels = np.load(path_for('language_model_data') / 'validation_labels.npy')
     assert isclose(len(language_model_validation_labels),
-                   len(dataframe) * app.config['CLASSIFIER_VALIDATION_DATA_FRACTION'], abs_tol=1)
+                   len(dataframe) * app.config['CLASSIFIER_VALIDATION_DATA_FRACTION'], abs_tol=2)
 
     # Test core/preprocessor:map_and_save_tokens_to_ids_for_language_model
     data_itos = pickle.load(open(path_for('data_itos'), 'rb'))
@@ -85,32 +85,32 @@ def test_preprocess_and_save_data(app, trained_pipeline):
 
     language_model_training_ids = np.load(path_for('language_model_data') / 'training_token_ids.npy')
     assert isclose(len(language_model_training_ids),
-                   len(dataframe) * (1 - app.config['CLASSIFIER_VALIDATION_DATA_FRACTION']), abs_tol=1)
+                   len(dataframe) * (1 - app.config['CLASSIFIER_VALIDATION_DATA_FRACTION']), abs_tol=2)
     language_model_validation_ids = np.load(path_for('language_model_data') / 'validation_token_ids.npy')
     assert isclose(len(language_model_validation_ids),
-                   len(dataframe) * app.config['CLASSIFIER_VALIDATION_DATA_FRACTION'], abs_tol=1)
+                   len(dataframe) * app.config['CLASSIFIER_VALIDATION_DATA_FRACTION'], abs_tol=2)
 
     # Test core/preprocessor:generate_and_save_classifier_tokens
     classifier_training_tokens = np.load(path_for('classifier_data') / 'training_tokens.npy')
     assert isclose(len(classifier_training_tokens),
-                   len(dataframe) * (1 - app.config['CLASSIFIER_VALIDATION_DATA_FRACTION']), abs_tol=1)
+                   len(dataframe) * (1 - app.config['CLASSIFIER_VALIDATION_DATA_FRACTION']), abs_tol=2)
     classifier_validation_tokens = np.load(path_for('classifier_data') / 'validation_tokens.npy')
     assert isclose(len(classifier_validation_tokens),
-                   len(dataframe) * app.config['CLASSIFIER_VALIDATION_DATA_FRACTION'], abs_tol=1)
+                   len(dataframe) * app.config['CLASSIFIER_VALIDATION_DATA_FRACTION'], abs_tol=2)
     classifier_training_labels = np.load(path_for('classifier_data') / 'training_labels.npy')
     assert isclose(len(classifier_training_labels),
-                   len(dataframe) * (1 - app.config['CLASSIFIER_VALIDATION_DATA_FRACTION']), abs_tol=1)
+                   len(dataframe) * (1 - app.config['CLASSIFIER_VALIDATION_DATA_FRACTION']), abs_tol=2)
     classifier_validation_labels = np.load(path_for('classifier_data') / 'validation_labels.npy')
     assert isclose(len(classifier_validation_labels),
-                   len(dataframe) * app.config['CLASSIFIER_VALIDATION_DATA_FRACTION'], abs_tol=1)
+                   len(dataframe) * app.config['CLASSIFIER_VALIDATION_DATA_FRACTION'], abs_tol=2)
 
     # Test core/preprocessor:map_and_save_tokens_to_ids_for_classifier
     classifier_training_ids = np.load(path_for('classifier_data') / 'training_token_ids.npy')
     assert isclose(len(classifier_training_ids),
-                   len(dataframe) * (1 - app.config['CLASSIFIER_VALIDATION_DATA_FRACTION']), abs_tol=1)
+                   len(dataframe) * (1 - app.config['CLASSIFIER_VALIDATION_DATA_FRACTION']), abs_tol=2)
     classifier_validation_ids = np.load(path_for('classifier_data') / 'validation_token_ids.npy')
     assert isclose(len(classifier_validation_ids), len(dataframe) * app.config['CLASSIFIER_VALIDATION_DATA_FRACTION'],
-                   abs_tol=1)
+                   abs_tol=2)
 
 
 def test_finetune_and_save_language_model(trained_pipeline):
