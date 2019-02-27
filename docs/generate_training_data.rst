@@ -52,7 +52,7 @@ Here, we consider only data from 2016 onwards since before that the curation rul
 Generate Rejected data
 ^^^^^^^^^^^^^^^^^^^^^^
 
-The data for Rejected articles is harvested from the local inspire-next instance in a hackish way. The workflows themselves need to be modified in our local inspire-next setup. First, the file *inspire-next/inspirehep/modules/workflows/workflows/article.py* needs to be modified as specified in ``article.py``. We need to add another file *inspire-next/inspirehep/modules/workflows/tasks/makejson.py* with the contents of ``makejson.py``.
+The data for Rejected articles is harvested from the local inspire-next instance in a hackish way. The workflows themselves need to be modified in our local inspire-next setup. First, we need to get the Core and Non-Core records ids. We can get by them running the script in ``get_core_and_non_core_recids.py`` from the inspirehep shell [1]_. This will produce two files: ``inspire_core_recids.txt`` and ``inspire_noncore_recids.txt``. Next, the file *inspire-next/inspirehep/modules/workflows/workflows/article.py* needs to be modified as specified in ``article.py``. We need to add another file *inspire-next/inspirehep/modules/workflows/tasks/makejson.py* with the contents of ``makejson.py``.
 
 Once the workflow has been modified, we are ready to start the harvest. First, we need to deploy the harvest spiders. This can be done from the *inspire-next* instance folder:
 
@@ -97,14 +97,14 @@ This will open our favorite text editor (or we'll be required to set it). Add th
 
 This will schedule a task to run every 15 minutes which will find and delete all files created before the last 30 minutes. It's recommended to schedule the cronjob after starting the harvests since the first harvests and workflows can take a few minutes to start. We can schedule the command to run more frequently or vice versa depending on our hardware specifications.
 
-The harvest produces a file named *inspire_harvested_data.json*. We can monitor the harvest status in the local holdingpen. However, it doesn't contain information on whether the harvested records were Core, Non-Core, or Rejected. To find this, we need to extract the list of arXiv identifiers of Core and Non-Core records from our local inspire-next instance. From the *inspirehep shell* [1]_, copy the contents of ``get_core_and_noncore_arXiv_identifiers.py`` and execute. This will produce two files, *inspire_core_list.txt* and *inspire_noncore_list.txt*. These files will be used to filter out Core and Non-Core records from the harvested data.
+The harvest produces a file named *inspire_harvested_data.json*. We can monitor the harvest status in the local holdingpen. However, it doesn't contain information on whether the harvested records were Core, Non-Core, or Rejected. To find this, we need to extract the list of arXiv identifiers of Core and Non-Core records from our local inspire-next instance. From the *inspirehep shell* [1]_, copy the contents of ``get_core_and_noncore_arXiv_identifiers.py`` and execute. This will produce two files, *inspire_core_arxiv_ids.txt* and *inspire_noncore_arxiv_ids.txt*. These files will be used to filter out Core and Non-Core records from the harvested data.
 
 Combine the Core, Non-Core, and Rejected data
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The Core, Non-Core, and Rejected data can be combined by using the python script found at ``combine_core_noncore_rejected_data.py``. The different required files paths need to be specified in the file before running the script. Finally, this will produce the file *inspire_data.df* which is a Pandas DataFrame and which can be used for training and evaluation of the INSPIRE classifier. This file should be placed at the path specified in *inspire-classifier/inspire_classifier/config.py* in the variable *CLASSIFIER_DATAFRAME_PATH*.
 
-The resulting pandas dataframe will contain 2 columns: *labels* and *text* where *text* is *title* and *abstract* concatenated with a *<ENDTITLE>* token in between.
+The resulting pandas dataframe will contain 8 columns: *core_references_fraction_first_order*, *core_references_fraction_second_order*, *noncore_references_fraction_first_order*, *noncore_references_fraction_second_order*, *total_first_order_references*, *total_second_order_references*, *labels*, and *text* where *text* is *title* and *abstract* concatenated with a *<ENDTITLE>* token in between.
 
 
 
