@@ -183,12 +183,20 @@ def train():
     train_and_save_classifier()
 
 
-def predict_coreness(title, abstract):
+def predict_coreness(title, abstract, core_references_fraction_first_order, core_references_fraction_second_order,
+                     noncore_references_fraction_first_order, noncore_references_fraction_second_order,
+                     total_first_order_references, total_second_order_references, training_set_means_for_reference_data,
+                     training_set_standard_deviations_for_reference_data):
     """
     Predicts class-wise probabilities given the title and abstract.
     """
     text = title + ' <ENDTITLE> ' + abstract
     categories = ['rejected', 'non_core', 'core']
+    reference_data = np.array([core_references_fraction_first_order, core_references_fraction_second_order,
+                     noncore_references_fraction_first_order, noncore_references_fraction_second_order,
+                     total_first_order_references, total_second_order_references])
+    reference_data_normalized = (reference_data - current_app.config['TRAINING_SET_MEANS_FOR_REFERENCE_DATA']) /\
+                                current_app.config['TRAINING_SET_STANDARD_DEVIATIONS_FOR_REFERENCE_DATA']
     try:
         classifier = Classifier(data_itos_path=path_for('data_itos'),
                                 number_of_classes=3, cuda_device_id=current_app.config['CLASSIFIER_CUDA_DEVICE_ID'])
@@ -200,7 +208,7 @@ def predict_coreness(title, abstract):
     except IOError as error:
         raise IOError('Could not load the trained classifier weights.') from error
 
-    class_probabilities = classifier.predict(text)
+    class_probabilities = classifier.predict(text, reference_data_normalized)
     assert len(class_probabilities) == 3
 
     predicted_class = categories[np.argmax(class_probabilities)]
