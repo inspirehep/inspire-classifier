@@ -56,14 +56,22 @@ def split_and_save_data_for_language_model_and_classifier(dataframe_path, langua
 
     # Shuffle the data
     inspire_data = inspire_data.sample(frac=1).reset_index(drop=True)
-    # Swap the columns so that the labels are Column 0 and the text is Column 1 (and remove any additional columns)
-    inspire_data = inspire_data[['labels', 'text']]
+    inspire_data = inspire_data[['core_reference_fraction_first_order', 'core_reference_fraction_second_order',
+                     'noncore_reference_fraction_first_order', 'noncore_reference_fraction_second_order',
+                     'total_first_order_references', 'total_second_order_references', 'labels', 'text']]
 
     training_dataframe, validation_dataframe = sklearn.model_selection.train_test_split(
         inspire_data, test_size=val_fraction)
 
     training_dataframe = training_dataframe.reset_index(drop=True)
     validation_dataframe = validation_dataframe.reset_index(drop=True)
+
+    # Standardize the numerical data values
+    training_data_means = training_dataframe[:,:-2].mean().values
+    training_data_standard_deviations = training_dataframe[:,:,-2].std().values
+
+    training_dataframe.iloc[:,:-2] = (training_dataframe.iloc[:,:-2] - training_data_means) / training_data_standard_deviations
+    validation_dataframe.iloc[:, :-2] = (validation_dataframe.iloc[:,:-2] - training_data_means) / training_data_standard_deviations
 
     # Save the data for the classifier
     training_dataframe.to_csv(classifier_data_dir / 'training_data.csv', header=False, index=False)
@@ -131,38 +139,54 @@ def generate_and_save_classifier_tokens(classifier_data_dir):
     training_dataframe = pd.read_csv(classifier_data_dir / 'training_data.csv', header=None)
     validation_dataframe = pd.read_csv(classifier_data_dir / 'validation_data.csv', header=None)
 
-    training_tokens, training_labels = get_texts(training_dataframe)
-    validation_tokens, validation_labels = get_texts(validation_dataframe)
+    training_tokens_text, training_references, training_labels = get_texts_classifier(training_dataframe)
+    validation_tokens_text, validation_references, validation_labels = get_texts_classifier(validation_dataframe)
 
-    assert len(training_tokens) == len(training_dataframe)
+    assert len(training_tokens_text) == len(training_dataframe)
 
-    np.save(classifier_data_dir / 'training_tokens.npy', training_tokens)
-    np.save(classifier_data_dir / 'validation_tokens.npy', validation_tokens)
+    np.save(classifier_data_dir / 'training_tokens_text.npy', training_tokens_text)
+    np.save(classifier_data_dir / 'validation_tokens_text.npy', validation_tokens_text)
+    np.save(classifier_data_dir / 'training_references.npy', training_references)
+    np.save(classifier_data_dir / 'validation_references.npy', validation_references)
     np.save(classifier_data_dir / 'training_labels.npy', training_labels)
     np.save(classifier_data_dir / 'validation_labels.npy', validation_labels)
 
 
 def map_and_save_tokens_to_ids_for_classifier(classifier_data_dir, data_itos_path):
-    training_tokens = np.load(classifier_data_dir / 'training_tokens.npy')
-    validation_tokens = np.load(classifier_data_dir / 'validation_tokens.npy')
+    training_tokens_text = np.load(classifier_data_dir / 'training_tokens_text.npy')
+    validation_tokens_text = np.load(classifier_data_dir / 'validation_tokens_text.npy')
 
     inspire_data_itos = pickle.load(open(data_itos_path, 'rb'))
     inspire_data_stoi = collections.defaultdict(lambda: 0, {v: k for k, v in enumerate(inspire_data_itos)})
 
-    training_token_ids = np.array([[inspire_data_stoi[o] for o in p] for p in training_tokens])
-    validation_token_ids = np.array([[inspire_data_stoi[o] for o in p] for p in validation_tokens])
+    training_token_ids = np.array([[inspire_data_stoi[o] for o in p] for p in training_tokens_text])
+    validation_token_ids = np.array([[inspire_data_stoi[o] for o in p] for p in validation_tokens_text])
 
     np.save(classifier_data_dir / 'training_token_ids.npy', training_token_ids)
     np.save(classifier_data_dir / 'validation_token_ids.npy', validation_token_ids)
 
 
 def get_texts(df):
-    labels = df[0].values.astype(np.int64)
-    texts = f'\n{BOS} {FLD} 1 ' + df[1].astype(str)
+    labels = df['labels'].values.astype(np.int64)
+    texts = f'\n{BOS} {FLD} 1 ' + df['text'].astype(str)
     texts = list(texts.apply(fixup).values)
 
     tokens = FastLoadTokenizer().proc_all_mp(partition_by_cores(texts))
     return tokens, list(labels)
+
+
+def get_texts_classifier(df):
+    labels = df['labels'].values.astype(np.int64)
+    texts = f'\n{BOS} {FLD} 1 ' + df['texts'].astype(str)
+    texts = list(texts.apply(fixup).values)
+    refs = np.array([df['core_references_fraction_first_order'].values.astype(np.float32),
+                     df['core_references_fraction_second_order'].values.astype(np.float32),
+                     df['noncore_references_fraction_first_order'].values.astype(np.float32),
+                     df['noncore_references_fraction_second_order'].values.astype(np.float32),
+                     df['total_first_order_references'].values.astype(np.float32),
+                     df['total_second_order_references'].values.astype(np.float32)])
+    tokens = FastLoadTokenizer().proc_all_mp(partition_by_cores(texts))
+    return tokens, refs.T, list(labels)
 
 
 def fixup(x):

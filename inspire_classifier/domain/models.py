@@ -30,15 +30,12 @@ import torch.optim as optim
 from fastai.text import (
     accuracy,
     DataLoader,
-    get_rnn_classifer,
     LanguageModelLoader,
     LanguageModelData,
     load_model,
     ModelData,
     RNN_Learner,
     T,
-    TextDataset,
-    TextModel,
     to_gpu,
     to_np,
     save_model,
@@ -48,7 +45,13 @@ from fastai.text import (
     Variable
 )
 from functools import partial
-from inspire_classifier.utils import FastLoadTokenizer
+from inspire_classifier.utils import (
+    FastLoadTokenizer,
+    get_rnn_classifier,
+    numpy_softmax,
+    TextPlusReferencesDataset,
+    TextPlusReferencesModel
+)
 import numpy as np
 import pickle
 
@@ -138,21 +141,23 @@ class Classifier(object):
         number_of_layers = 3
         embedding_size = 400
 
-        self.model = get_rnn_classifer(bptt=number_of_back_propagation_through_time_steps,
-                                       max_seq=20 * number_of_back_propagation_through_time_steps,
-                                       n_class=number_of_classes, n_tok=self.vocabulary_size, emb_sz=embedding_size,
-                                       n_hid=number_of_hidden_units, n_layers=number_of_layers, pad_token=1,
-                                       layers=[embedding_size * 3, 50, number_of_classes], drops=[dropouts[4], 0.1],
-                                       dropouti=dropouts[0], wdrop=dropouts[1], dropoute=dropouts[2],
-                                       dropouth=dropouts[3])
+        self.model = get_rnn_classifier(bptt=number_of_back_propagation_through_time_steps,
+                                        max_seq=20 * number_of_back_propagation_through_time_steps,
+                                        n_tok=self.vocabulary_size, emb_sz=embedding_size, n_hid=number_of_hidden_units,
+                                        n_layers=number_of_layers, pad_token=1,
+                                        layers=[embedding_size * 3 + 100, 50, number_of_classes], drops=[dropouts[4], 0.1],
+                                        dropouti=dropouts[0], wdrop=dropouts[1], dropoute=dropouts[2],
+                                        dropouth=dropouts[3])
 
         self.tokenizer = FastLoadTokenizer()
 
-    def load_training_and_validation_data(self, training_data_ids_path, training_data_labels_path,
-                                          validation_data_ids_path, validation_data_labels_path, classifier_data_dir,
-                                          batch_size=10):
+    def load_training_and_validation_data(self, training_data_ids_path, training_data_references_path, training_data_labels_path,
+                                          validation_data_ids_path, validation_data_references_path, validation_data_labels_path,
+                                          classifier_data_dir, batch_size=10):
         training_token_ids = np.load(training_data_ids_path)
         validation_token_ids = np.load(validation_data_ids_path)
+        training_references = np.load(training_data_references_path)
+        validation_references = np.load(validation_data_references_path)
         training_labels = np.load(training_data_labels_path)
         validation_labels = np.load(validation_data_labels_path)
 
@@ -161,8 +166,8 @@ class Classifier(object):
         training_labels -= training_labels.min()
         validation_labels -= validation_labels.min()
 
-        training_dataset = TextDataset(training_token_ids, training_labels)
-        validation_dataset = TextDataset(validation_token_ids, validation_labels)
+        training_dataset = TextPlusReferencesDataset(training_token_ids, training_references, training_labels)
+        validation_dataset = TextPlusReferencesDataset(validation_token_ids, validation_references, validation_labels)
         training_data_sampler = SortishSampler(data_source=training_token_ids, key=lambda x: len(training_token_ids[x]),
                                                bs=batch_size // 2)
         validation_data_sampler = SortSampler(data_source=validation_token_ids,
@@ -176,14 +181,14 @@ class Classifier(object):
     def initialize_learner(self):
         optimization_function = partial(optim.Adam, betas=(0.8, 0.99))
 
-        self.learner = RNN_Learner(data=self.model_data, models=TextModel(to_gpu(self.model)),
+        self.learner = RNN_Learner(data=self.model_data, models=TextPlusReferencesModel(to_gpu(self.model)),
                                    opt_fn=optimization_function)
         self.learner.reg_fn = partial(seq2seq_reg, alpha=2, beta=1)
         self.learner.clip = 25.
         self.learner.metrics = [accuracy]
 
     def load_finetuned_language_model_weights(self, finetuned_language_model_encoder_path):
-        load_model(self.learner.model[0], finetuned_language_model_encoder_path)
+        load_model(self.learner.model.text_network, finetuned_language_model_encoder_path)
 
     def train(self, trained_classifier_save_path, learning_rates=np.array([1e-4, 1e-4, 1e-4, 1e-3, 1e-2]),
               weight_decay=1e-6, cycle_length=14):
@@ -199,7 +204,7 @@ class Classifier(object):
     def load_trained_classifier_weights(self, trained_classifier_path):
         self.model.load_state_dict(torch.load(trained_classifier_path, map_location=lambda storage, loc: storage))
 
-    def predict(self, text):
+    def predict(self, text, reference_data):
         self.model.reset()
         self.model.eval()
 
@@ -209,15 +214,7 @@ class Classifier(object):
         encoded_tokens = [self.inspire_data_stoi[p] for p in tokens[0]]
         token_array = np.reshape(np.array(encoded_tokens), (-1, 1))
         token_array = Variable(torch.from_numpy(token_array))
-        prediction_scores = self.model(token_array)
+        prediction_scores = self.model(token_array, reference_data)
         prediction_scores_numpy = prediction_scores[0].data.cpu().numpy()
 
         return numpy_softmax(prediction_scores_numpy[0])[0]
-
-
-def numpy_softmax(x):
-    if x.ndim == 1:
-        x = x.reshape((1, -1))
-    max_x = np.max(x, axis=1).reshape((-1, 1))
-    exp_x = np.exp(x - max_x)
-    return exp_x / np.sum(exp_x, axis=1).reshape((-1, 1))

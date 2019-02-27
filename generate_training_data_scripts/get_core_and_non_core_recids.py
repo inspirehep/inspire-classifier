@@ -20,11 +20,6 @@
 # granted to it by virtue of its status as an Intergovernmental Organization
 # or submit itself to any jurisdiction.
 
-"""
-Get the arxiv ids of all the Core and Non-Core records in INSPIRE.
-Please run the code in this snippet from within the inspirehep shell.
-"""
-
 from __future__ import absolute_import, division, print_function
 
 from invenio_search import current_search_client as es
@@ -34,17 +29,17 @@ from elasticsearch.helpers import scan
 core = []
 non_core = []
 
-
-for hit in scan(es, query={"query": {"exists": {"field": "arxiv_eprints"}}, "_source": ["core", "arxiv_eprints"]},
+for hit in scan(es, query={"query": {"exists": {"field": "control_number"}}, "_source": ["core", "control_number"]},
                 index='records-hep', doc_type='hep'):
     source = hit['_source']
-    arxiv_eprint = source['arxiv_eprints'][0]['value']
+    control_number = source['control_number']
     if source.get('core') == True:
-        core.append(arxiv_eprint)
+        core.append(control_number)
     else:
-        non_core.append(arxiv_eprint)
+        non_core.append(control_number)
 
-with open('inspire_core_arxiv_ids.txt', 'w') as fd:
-    fd.writelines("{}\n".format(arxiv_id) for arxiv_id in core)
-with open('inspire_noncore_arxiv_ids.txt', 'w') as fd:
-    fd.writelines("{}\n".format(arxiv_id) for arxiv_id in non_core)
+with open('inspire_core_recids.txt', 'w') as fd:
+    fd.writelines("{}\n".format(recid) for recid in core)
+with open('inspire_noncore_recids.txt', 'w') as fd:
+    fd.writelines("{}\n".format(recid) for recid in non_core)
+
