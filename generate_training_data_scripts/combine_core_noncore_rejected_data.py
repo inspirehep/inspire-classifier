@@ -24,16 +24,16 @@ import json
 import numpy as np
 import pandas as pd
 
-inspire_core_list_path = 'inspire_core_list.txt'
-inspire_noncore_list_path = 'inspire_noncore_list.txt'
+inspire_core_arxiv_ids_path = 'inspire_core_arxiv_ids.txt'
+inspire_noncore_arxiv_ids_path = 'inspire_noncore_arxiv_ids.txt'
 inspire_harvested_data_path = 'inspire_harvested_data.jsonl'
 inspire_core_data_path = 'inspire_core_records.jsonl'
 inspire_noncore_data_path = 'inspire_noncore_records.jsonl'
 save_path = 'inspire_data.df'
 
-with open(inspire_core_list_path, 'r') as fd:
+with open(inspire_core_arxiv_ids_path, 'r') as fd:
     inspire_core_arxiv_ids = set(arxiv_id.strip() for arxiv_id in fd.readlines())
-with open(inspire_noncore_list_path, 'r') as fd:
+with open(inspire_noncore_arxiv_ids_path, 'r') as fd:
     inspire_noncore_arxiv_ids = set(arxiv_id.strip() for arxiv_id in fd.readlines())
 
 def rejected_data(harvested_data_path):
@@ -67,5 +67,5 @@ core_df['labels'] = 2
 
 inspire_data = pd.concat([rejected_df, noncore_df, core_df], ignore_index=True)
 inspire_data['text'] = inspire_data['title'] + ' <ENDTITLE> ' + inspire_data['abstract']
-inspire_data = inspire_data[['labels', 'text']]
+inspire_data = inspire_data.drop(['title', 'abstract'], axis=1)
 inspire_data.to_pickle(save_path)
