@@ -21,6 +21,7 @@
 # or submit itself to any jurisdiction.
 
 import datetime
+import os
 
 from flask import Flask, jsonify, Response
 from flask_apispec import use_kwargs, marshal_with, FlaskApiSpec
@@ -45,6 +46,8 @@ def create_app():
     app = Flask(__name__)
     app.config['CLASSIFIER_BASE_PATH'] = app.instance_path
     app.config.from_object('inspire_classifier.config')
+    app.config['CLASSIFIER_CUDA_DEVICE_ID'] = int(os.environ.get('CLASSIFIER_CUDA_DEVICE_ID', -1))
+
     docs = FlaskApiSpec(app)
 
     @app.route("/api/health")
