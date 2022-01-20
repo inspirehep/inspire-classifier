@@ -115,6 +115,8 @@ class LanguageModel(object):
         self.learner.model.load_state_dict(weights)
 
     def train(self, finetuned_language_model_encoder_save_path, learning_rate=1e-3, weight_decay=1e-7, cycle_length=15):
+        print('language model training starts')
+        print(f'Loaded torch version: {torch.__version__}')
         self.learner.freeze_to(-1)
         self.learner.fit(learning_rate / 2, n_cycle=1, wds=weight_decay, use_clr=(32, 2), cycle_len=1)
         self.learner.unfreeze()
@@ -187,6 +189,8 @@ class Classifier(object):
 
     def train(self, trained_classifier_save_path, learning_rates=np.array([1e-4, 1e-4, 1e-4, 1e-3, 1e-2]),
               weight_decay=1e-6, cycle_length=14):
+        print('Core classifier model training starts')
+        print(f'Loaded torch version: {torch.__version__}')
         self.learner.freeze_to(-1)
         self.learner.fit(learning_rates, n_cycle=1, wds=weight_decay, cycle_len=1, use_clr=(8, 3))
         self.learner.freeze_to(-2)
