@@ -39,6 +39,8 @@ from inspire_classifier.domain.preprocessor import (
 )
 from inspire_classifier.utils import path_for
 import numpy as np
+from sklearn.metrics import f1_score, classification_report, confusion_matrix
+from pprint import pprint
 import requests
 
 
@@ -208,3 +210,24 @@ def predict_coreness(title, abstract):
     output_dict['scores'] = dict(zip(categories, class_probabilities))
 
     return output_dict
+
+
+def validate_classifier(validation_df):
+    try:
+        classifier = Classifier(data_itos_path=path_for('data_itos'),
+                                number_of_classes=3, cuda_device_id=current_app.config['CLASSIFIER_CUDA_DEVICE_ID'])
+    except IOError as error:
+        raise IOError('Data ITOS not found.') from error
+
+    classifier.load_trained_classifier_weights(path_for('trained_classifier'))
+    predictions = []
+    true_labels = validation_df.labels.values
+    for _, row in validation_df.iterrows():
+        predicted_value = classifier.predict(row.text)
+        predicted_class = np.argmax(predicted_value)
+        predictions.append(predicted_class)
+        print(f'y pred: {predicted_class}, y true: {row.labels}')
+
+    print('f1 score ', f1_score(true_labels, predictions, average='micro'))
+    pprint(classification_report(true_labels, predictions))
+    pprint(confusion_matrix(true_labels, predictions))
