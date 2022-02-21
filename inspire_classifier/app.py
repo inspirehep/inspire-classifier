@@ -43,10 +43,10 @@ class JsonResponse(Response):
 
 def create_app():
     Flask.response_class = JsonResponse
-    app = Flask(__name__)
+    app = Flask(__name__, instance_relative_config=True)
     app.config['CLASSIFIER_BASE_PATH'] = app.instance_path
     app.config.from_object('inspire_classifier.config')
-    app.config['CLASSIFIER_CUDA_DEVICE_ID'] = int(os.environ.get('CLASSIFIER_CUDA_DEVICE_ID', -1))
+    app.config.from_pyfile('classifier.cfg', silent=True)
 
     docs = FlaskApiSpec(app)
 
