@@ -44,7 +44,8 @@ install_requires = [
     'marshmallow~=3.14.0',
     'numpy==1.15.4',
     'spacy~=2.0,>=2.0.0',
-    'torchtext==0.2.3'
+    'torchtext==0.2.3',
+    'prometheus-flask-exporter~=0.20,>=0.20.1'
 ]
 
 docs_require = []

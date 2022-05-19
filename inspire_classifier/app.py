@@ -21,12 +21,15 @@
 # or submit itself to any jurisdiction.
 
 import datetime
+import logging
 import os
 
 from flask import Flask, jsonify, Response
 from flask_apispec import use_kwargs, marshal_with, FlaskApiSpec
 from inspire_classifier.api import predict_coreness
 from marshmallow import fields
+from prometheus_flask_exporter.multiprocess import \
+    GunicornInternalPrometheusMetrics
 
 from . import serializers
 
@@ -80,6 +83,10 @@ def create_app():
 
 
 app = create_app()
+if app.config.get('PROMETHEUS_ENABLE_EXPORTER_FLASK'):
+    logging.info("Starting prometheus metrics exporter")
+    metrics = GunicornInternalPrometheusMetrics.for_app_factory(prefix=app.name)
+    metrics.init_app(app)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0')
