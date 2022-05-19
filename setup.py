@@ -42,7 +42,7 @@ install_requires = [
     'Flask~=1.0,>=1.0.2',
     'flask-apispec~=0.0,>=0.7.0',
     'marshmallow~=3.14.0',
-    'numpy==1.15.4',
+    'numpy==1.21.0',
     'spacy~=2.0,>=2.0.0',
     'torchtext==0.2.3',
     'prometheus-flask-exporter~=0.20,>=0.20.1'
