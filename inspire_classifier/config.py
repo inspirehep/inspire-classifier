@@ -46,3 +46,4 @@ CLASSIFIER_DATA_ITOS_PATH = 'data/inspire_data_itos.pkl'
 
 CLASSIFIER_WIKITEXT103_LANGUAGE_MODEL_URL = 'http://files.fast.ai/models/wt103/fwd_wt103.h5'
 CLASSIFIER_WIKITEXT103_ITOS_URL = 'http://files.fast.ai/models/wt103/itos_wt103.pkl'
+PROMETHEUS_ENABLE_EXPORTER_FLASK = False
