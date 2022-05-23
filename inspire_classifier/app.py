@@ -85,7 +85,7 @@ def create_app():
 app = create_app()
 if app.config.get('PROMETHEUS_ENABLE_EXPORTER_FLASK'):
     logging.info("Starting prometheus metrics exporter")
-    metrics = GunicornInternalPrometheusMetrics.for_app_factory(prefix=app.name)
+    metrics = GunicornInternalPrometheusMetrics.for_app_factory()
     metrics.init_app(app)
 
 if __name__ == '__main__':
