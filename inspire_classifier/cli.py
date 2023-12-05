@@ -20,15 +20,18 @@
 # granted to it by virtue of its status as an Intergovernmental Organization
 # or submit itself to any jurisdiction.
 
+from copyreg import pickle
 import click
 import click_spinner
 from flask import current_app
 from flask.cli import FlaskGroup, with_appcontext
 from inspire_classifier.api import (
     train,
-    predict_coreness
+    predict_coreness,
+    validate_classifier
 )
 from inspire_classifier.app import create_app
+import pandas as pd
 
 
 @click.group(cls=FlaskGroup, create_app=create_app)
@@ -64,3 +67,14 @@ def train_classifier(language_model_epochs, classifier_epochs, base_path):
             if base_path:
                 current_app.config['CLASSIFIER_BASE_PATH'] = base_path
             train()
+
+
+@inspire_classifier.command('validate')
+@with_appcontext
+@click.option('-p', '--dataframe-path', type=click.Path(exists=True), required=True, nargs=1)
+@click.option('-b', '--base-path', type=click.Path(exists=True), required=False, nargs=1)
+def validate_classifier(dataframe_path, base_path):
+    if base_path:
+        current_app.config['CLASSIFIER_BASE_PATH'] = base_path
+    df = pd.read_pickle(dataframe_path)
+    validate_classifier(df)

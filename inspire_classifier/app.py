@@ -50,6 +50,7 @@ def create_app():
     app.config['CLASSIFIER_BASE_PATH'] = app.instance_path
     app.config.from_object('inspire_classifier.config')
     app.config.from_pyfile('classifier.cfg', silent=True)
+    app.config['CLASSIFIER_CUDA_DEVICE_ID'] = int(os.environ.get('CLASSIFIER_CUDA_DEVICE_ID', -1))
 
     docs = FlaskApiSpec(app)
 
