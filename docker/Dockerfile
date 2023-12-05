@@ -25,12 +25,12 @@ FROM pytorch/pytorch:0.4_cuda9_cudnn7
 COPY instance-data /opt/conda/var/inspire_classifier.app-instance/
 COPY boot.sh requirements.txt /app/
 WORKDIR /app
-RUN apt-get update && apt-get -y install ffmpeg libglib2.0-0 libsm6 libxrender1 libxext6 build-essential git \
-    && python -m pip install pip --upgrade \
+RUN apt-get update && apt-get -y install ffmpeg libglib2.0-0 libsm6 libxrender1 libxext6 build-essential git
+RUN python -m pip install --upgrade pip \
+    && pip install --upgrade setuptools wheel \
     && pip install --upgrade --no-deps --force-reinstall https://download.pytorch.org/whl/cpu/torch-0.3.1-cp36-cp36m-linux_x86_64.whl \
     && pip freeze \
-    && pip install --upgrade setuptools \
-    && pip install -r requirements.txt \
+    && pip install -r requirements.txt -v \
     && pip freeze \
     && apt-get -y remove build-essential git \
     && apt-get -y autoremove && apt-get clean
