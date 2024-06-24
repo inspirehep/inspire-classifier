@@ -1,0 +1,30 @@
+name: Push master
+
+on: workflow_dispatch
+#  push:
+#    branches: [master]
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  build:
+    uses: ./.github/workflows/build.yml
+    with:
+      ref: ${{ inputs.ref }}
+      image: cern-sis/inspire/classifier
+      context: .
+    secrets: inherit
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: send event
+        uses: cern-sis/gh-workflows/.github/actions/kubernetes-project-new-images@v6.3.0
+        with:
+          event-type: update
+          images: |
+            cern-sis/inspire/classifier@${{ needs.build.outputs.image-id }}
+          token: ${{ secrets.PAT_FIRE_EVENTS_ON_CERN_SIS_KUBERNETES }}

@@ -20,51 +20,46 @@
 # granted to it by virtue of its status as an Intergovernmental Organization
 # or submit itself to any jurisdiction.
 
-from inspire_classifier.app import create_app
-from inspire_classifier.api import (
-    create_directories,
-    train
-)
-from inspire_classifier.domain.models import RNN_Learner
-from inspire_classifier.utils import path_for
-from mock import patch
-from pathlib import Path
-import pytest
 import shutil
+from pathlib import Path
+
+import pytest
+from fastai.text.all import Learner
+from mock import patch
+
+from inspire_classifier.api import create_directories, train
+from inspire_classifier.app import create_app
+from inspire_classifier.utils import path_for
 
 
-@pytest.fixture(autouse=True, scope='session')
+@pytest.fixture(autouse=True, scope="session")
 def app():
     app = create_app()
     with app.app_context():
-        app.config['CLASSIFIER_MAXIMUM_VOCABULARY_SIZE'] = 500
-        app.config['CLASSIFIER_MINIMUM_WORD_FREQUENCY'] = 1
-        app.config['CLASSIFIER_LANGUAGE_MODEL_CYCLE_LENGTH'] = 1
-        app.config['CLASSIFIER_CLASSIFIER_CYCLE_LENGTH'] = 1
-        app.config['CLASSIFIER_LANGUAGE_MODEL_BATCH_SIZE'] = 10
-        app.config['CLASSIFIER_CLASSIFIER_BATCH_SIZE'] = 10
-        app.config['CLASSIFIER_VALIDATION_DATA_FRACTION'] = 0.2
+        app.config["CLASSIFIER_MAXIMUM_VOCABULARY_SIZE"] = 500
+        app.config["CLASSIFIER_MINIMUM_WORD_FREQUENCY"] = 1
+        app.config["CLASSIFIER_LANGUAGE_MODEL_CYCLE_LENGTH"] = 1
+        app.config["CLASSIFIER_CLASSIFIER_CYCLE_LENGTH"] = 1
+        app.config["CLASSIFIER_LANGUAGE_MODEL_BATCH_SIZE"] = 10
+        app.config["CLASSIFIER_CLASSIFIER_BATCH_SIZE"] = 10
+        app.config["CLASSIFIER_VALIDATION_DATA_FRACTION"] = 0.2
         yield app
 
 
-# TODO: all fixtures using ``app`` must be replaced by ones that use ``isolated_app``.
 @pytest.fixture()
 def app_client(app):
-    """Flask test client for the application.
-    See: http://flask.pocoo.org/docs/0.12/testing/#keeping-the-context-around.
-    """
-    with app.test_client() as client:
-        yield client
+    return app.test_client()
 
 
-class Mock_RNN_Learner(RNN_Learner):
+class Mock_Learner(Learner):
     """
-    Mocks the fit method of the RNN_Learner.
+    Mocks the fit method of the Learner.
 
     This is done to reduce the model training time during testing by making the fit run once (as opposed to 2 times and
     3 times for the LanguageModel and Classifier respectively). It stores the result of the first run and then returns
     the same result for the other times fit is run.
     """
+
     def fit(self, *args, **kwargs):
         try:
             return self._fit_result
@@ -73,15 +68,13 @@ class Mock_RNN_Learner(RNN_Learner):
             return self._fit_result
 
 
-@pytest.fixture(scope='session')
-@patch(
-    'fastai.text.RNN_Learner', Mock_RNN_Learner
-)
-@patch(
-    'inspire_classifier.domain.models.RNN_Learner', Mock_RNN_Learner
-)
+@pytest.fixture(scope="session")
+@patch("fastai.text.learner.text_classifier_learner", Mock_Learner)
 def trained_pipeline(app, tmp_path_factory):
-    app.config['CLASSIFIER_BASE_PATH'] = tmp_path_factory.getbasetemp()
+    app.config["CLASSIFIER_BASE_PATH"] = tmp_path_factory.getbasetemp()
     create_directories()
-    shutil.copy(Path(__file__).parent / 'fixtures' / 'inspire_test_data.df', path_for('dataframe'))
+    shutil.copy(
+        Path(__file__).parent / "fixtures" / "inspire_test_data.df",
+        path_for("dataframe"),
+    )
     train()

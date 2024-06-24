@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of INSPIRE.
-# Copyright (C) 2014-2018 CERN.
+# Copyright (C) 2014-2024 CERN.
 #
 # INSPIRE is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -25,11 +25,13 @@ from marshmallow.validate import OneOf
 
 
 class ScoreSchema(Schema):
-    rejected = fields.Float(attribute='rejected', required=True)
-    non_core = fields.Float(attribute='non_core', required=True)
-    core = fields.Float(attribute='core', required=True)
+    rejected = fields.Float(attribute="rejected", required=True)
+    non_core = fields.Float(attribute="non_core", required=True)
+    core = fields.Float(attribute="core", required=True)
 
 
 class ClassifierOutputSerializer(Schema):
-    prediction = fields.Str(validate=OneOf(['core', 'non_core', 'rejected']), required=True)
+    prediction = fields.Str(
+        validate=OneOf(["core", "non_core", "rejected"]), required=True
+    )
     scores = fields.Nested(ScoreSchema)

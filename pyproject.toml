@@ -1,0 +1,63 @@
+[tool.poetry]
+name = "inspire-classifier"
+version = "2.0.0"
+description = "INSPIRE module aimed at automatically classifying the new papers that are added to INSPIRE, such as if they are core or not, or the arXiv category corresponding to each of them."
+authors = ["CERN <admin@inspirehep.net>"]
+license = "MIT License"
+homepage = "https://inspirehep.net"
+repository = "https://github.com/inspirehep/inspire-classifier"
+classifiers=[
+    "Environment :: Web Environment",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
+    "Development Status :: 5 - Production/Stable",
+]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+click = "^8.1.7"
+pandas = "^2.2.2"
+tqdm = "^4.66.4"
+click-spinner = "^0.1.10"
+flask = "^3.0.3"
+scikit-learn = "^1.5.0"
+prometheus-flask-exporter = "^0.23.0"
+fastai = "2.7.15"
+webargs = "^8.4.0"
+numpy = "1.26.4"
+gunicorn = "^22.0.0"
+
+[tool.poetry.group.test.dependencies]
+pytest = "^8.2.2"
+mock = "^5.1.0"
+
+
+[tool.poetry.group.dev.dependencies]
+black = "^24.4.2"
+pre-commit = "*"
+elasticsearch-dsl = "^7.4.0"
+elasticsearch = "<7.14.0"
+inspire-utils = "3.0.22"
+
+
+isort = "^5.13.2"
+boto3 = "^1.34.130"
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+
+[tool.poetry.scripts]
+inspire-classifier = 'inspire_classifier.cli:inspire_classifier'
+
+[tool.pytest.ini_options]
+testpaths = [
+    "tests",
+]
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+atomic = true

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of INSPIRE.
-# Copyright (C) 2014-2018 CERN.
+# Copyright (C) 2014-2024 CERN.
 #
 # INSPIRE is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -25,116 +25,77 @@
 """Classifier API."""
 
 
-from flask import current_app
-from inspire_classifier.domain.models import (
-    Classifier,
-    LanguageModel
-)
-from inspire_classifier.domain.preprocessor import (
-    generate_and_save_classifier_tokens,
-    generate_and_save_language_model_tokens,
-    map_and_save_tokens_to_ids_for_classifier,
-    map_and_save_tokens_to_ids_for_language_model,
-    split_and_save_data_for_language_model_and_classifier
-)
-from inspire_classifier.utils import path_for
-import numpy as np
-from sklearn.metrics import f1_score, classification_report, confusion_matrix
 from pprint import pprint
-import requests
+
+import numpy as np
+from flask import current_app
+from sklearn.metrics import classification_report, confusion_matrix, f1_score
+from tqdm import tqdm
+
+from inspire_classifier.domain.models import Classifier, LanguageModel
+from inspire_classifier.domain.preprocessor import split_and_save_data_for_training
+from inspire_classifier.utils import path_for
 
 
 def create_directories():
     """Create the project data and model directories"""
-    path_for('classifier_data').mkdir(parents=True, exist_ok=True)
-    path_for('language_model_data').mkdir(parents=True, exist_ok=True)
-    path_for('classifier_model').mkdir(parents=True, exist_ok=True)
-    (path_for('language_model') / 'wikitext_103').mkdir(parents=True, exist_ok=True)
+    path_for("data").mkdir(parents=True, exist_ok=True)
+    path_for("language_model").mkdir(parents=True, exist_ok=True)
+    path_for("classifier_model").mkdir(parents=True, exist_ok=True)
 
 
-def preprocess_and_save_data():
+def split_data():
     """
-    Prepares the data for training.
+    Splits the data into training and validation set.
     """
     try:
-        split_and_save_data_for_language_model_and_classifier(
-            dataframe_path=path_for('dataframe'), language_model_data_dir=path_for('language_model_data'),
-            classifier_data_dir=path_for('classifier_data'),
-            val_fraction=current_app.config['CLASSIFIER_VALIDATION_DATA_FRACTION']
+        split_and_save_data_for_training(
+            dataframe_path=path_for("dataframe"),
+            dest_dir=path_for("train_valid_data"),
+            val_fraction=current_app.config["CLASSIFIER_VALIDATION_DATA_FRACTION"],
         )
     except IOError as error:
-        raise IOError('Training dataframe not found. Make sure the file is present in the right directory. '
-                      'Please use the path specified in config.py for CLASSIFIER_DATAFRAME_PATH relative to the '
-                      'CLASSIFIER_BASE_PATH.') from error
-
-    try:
-        generate_and_save_language_model_tokens(language_model_data_dir=path_for('language_model_data'))
-    except IOError as error:
-        raise IOError('Language Model data directory does not exist.') from error
-
-    try:
-        map_and_save_tokens_to_ids_for_language_model(
-            language_model_data_dir=path_for('language_model_data'), data_itos_path=path_for('data_itos'),
-            max_vocab_size=current_app.config['CLASSIFIER_MAXIMUM_VOCABULARY_SIZE'],
-            minimum_frequency=current_app.config['CLASSIFIER_MINIMUM_WORD_FREQUENCY']
-        )
-    except IOError as error:
-        raise IOError('Language Model data directory or the data directory do not exist.') from error
-
-    try:
-        generate_and_save_classifier_tokens(classifier_data_dir=path_for('classifier_data'))
-    except IOError as error:
-        raise IOError('Classifier data directory does not exist.') from error
-
-    try:
-        map_and_save_tokens_to_ids_for_classifier(classifier_data_dir=path_for('classifier_data'),
-                                                  data_itos_path=path_for('data_itos'))
-    except IOError as error:
-        raise IOError('Classifier data directory or the data ITOS does not exist.') from error
+        raise IOError(
+            "Training dataframe not found. Make sure the file is present in the right directory. "
+            "Please use the path specified in config.py for CLASSIFIER_DATAFRAME_PATH relative to the "
+            "CLASSIFIER_BASE_PATH."
+        ) from error
 
 
 def finetune_and_save_language_model():
     """
-    Finetunes the pretrained (on wikitext103) language model on our dataset.
+    Finetunes the pretrained language model on our dataset.
     """
     try:
         language_model = LanguageModel(
-            training_data_ids_path=path_for('language_model_data') / 'training_token_ids.npy',
-            validation_data_ids_path=path_for('language_model_data') / 'validation_token_ids.npy',
-            language_model_model_dir=path_for('language_model_data'),
-            data_itos_path=path_for('data_itos'), cuda_device_id=current_app.config['CLASSIFIER_CUDA_DEVICE_ID'],
-            batch_size=current_app.config['CLASSIFIER_LANGUAGE_MODEL_BATCH_SIZE']
+            train_valid_data_dir=path_for("train_valid_data"),
+            data_itos_path=path_for("data_itos"),
+            cuda_device_id=current_app.config["CLASSIFIER_CUDA_DEVICE_ID"],
+            batch_size=current_app.config["CLASSIFIER_LANGUAGE_MODEL_BATCH_SIZE"],
+            minimum_word_frequency=current_app.config[
+                "CLASSIFIER_MINIMUM_WORD_FREQUENCY"
+            ],
+            maximum_vocabulary_size=current_app.config[
+                "CLASSIFIER_MAXIMUM_VOCABULARY_SIZE"
+            ],
         )
     except IOError as error:
-        raise IOError('Training files, language model data directory, or data ITOS do not exist.') from error
-
-    if not path_for('pretrained_language_model').exists():
-        wikitext103_language_model_response = requests.get(
-            current_app.config['CLASSIFIER_WIKITEXT103_LANGUAGE_MODEL_URL'], allow_redirects=True)
-        wikitext103_language_model_response.raise_for_status()
-        with open(path_for('pretrained_language_model'), 'wb') as fd:
-            fd.write(wikitext103_language_model_response.content)
-    if not path_for('wikitext103_itos').exists():
-        wikitext103_itos_response = requests.get(current_app.config['CLASSIFIER_WIKITEXT103_ITOS_URL'],
-                                                 allow_redirects=True)
-        wikitext103_itos_response.raise_for_status()
-        with open(path_for('wikitext103_itos'), 'wb') as fd:
-            fd.write(wikitext103_itos_response.content)
+        raise IOError(
+            "Training files, language model data directory, or data ITOS do not exist."
+        ) from error
 
     try:
-        language_model.load_pretrained_language_model_weights(
-            pretrained_language_model_path=path_for('pretrained_language_model'),
-            wikitext103_itos_path=path_for('wikitext103_itos')
+        language_model.train(
+            finetuned_language_model_encoder_save_path=path_for(
+                "finetuned_language_model_encoder"
+            ),
+            cycle_length=current_app.config["CLASSIFIER_LANGUAGE_MODEL_CYCLE_LENGTH"],
         )
     except IOError as error:
-        raise IOError('Wikitext103 pretrained language model and Wikitext103 ITOS do not exist.') from error
-
-    try:
-        language_model.train(finetuned_language_model_encoder_save_path=path_for('finetuned_language_model_encoder'),
-                             cycle_length=current_app.config['CLASSIFIER_LANGUAGE_MODEL_CYCLE_LENGTH'])
-    except IOError as error:
-        raise IOError('Unable to save the finetuned language model. Please check that the language model data directory '
-                      'exists.') from error
+        raise IOError(
+            "Unable to save the finetuned language model. Please check that the language model data directory "
+            "exists."
+        ) from error
 
 
 def train_and_save_classifier():
@@ -142,37 +103,42 @@ def train_and_save_classifier():
     Trains the classifier on our dataset and save the weights.
     """
     try:
-        classifier = Classifier(data_itos_path=path_for('data_itos'),
-                                number_of_classes=3, cuda_device_id=current_app.config['CLASSIFIER_CUDA_DEVICE_ID'])
+        classifier = Classifier(
+            cuda_device_id=current_app.config["CLASSIFIER_CUDA_DEVICE_ID"]
+        )
     except IOError as error:
-        raise IOError('Data ITOS not found.') from error
+        raise IOError("Data ITOS not found.") from error
 
     try:
         classifier.load_training_and_validation_data(
-            training_data_ids_path=path_for('classifier_data') / 'training_token_ids.npy',
-            training_data_labels_path=path_for('classifier_data') / 'training_labels.npy',
-            validation_data_ids_path=path_for('classifier_data') / 'validation_token_ids.npy',
-            validation_data_labels_path=path_for('classifier_data') / 'validation_labels.npy',
-            classifier_data_dir=path_for('classifier_data'),
-            batch_size=current_app.config['CLASSIFIER_CLASSIFIER_BATCH_SIZE']
+            train_valid_data_dir=path_for("train_valid_data"),
+            data_itos_path=path_for("data_itos"),
+            batch_size=current_app.config["CLASSIFIER_CLASSIFIER_BATCH_SIZE"],
         )
     except IOError as error:
-        raise IOError('Training and Validation data for Classifier not found.') from error
+        raise IOError(
+            "Training and Validation data for Classifier not found."
+        ) from error
 
     classifier.initialize_learner()
 
     try:
+        print(path_for("finetuned_language_model_encoder"))
         classifier.load_finetuned_language_model_weights(
-            finetuned_language_model_encoder_path=path_for('finetuned_language_model_encoder')
+            finetuned_language_model_encoder_path=path_for(
+                "finetuned_language_model_encoder"
+            )
         )
     except IOError as error:
-        raise IOError('Finetuned Language Model Encoder does not exist.') from error
+        raise IOError("Finetuned Language Model Encoder does not exist.") from error
 
     try:
-        classifier.train(trained_classifier_save_path=path_for('trained_classifier'),
-                         cycle_length=current_app.config['CLASSIFIER_CLASSIFIER_CYCLE_LENGTH'])
+        classifier.train(
+            trained_classifier_save_path=path_for("trained_classifier"),
+            cycle_length=current_app.config["CLASSIFIER_CLASSIFIER_CYCLE_LENGTH"],
+        )
     except IOError as error:
-        raise IOError('Unable to save the trained classifier.') from error
+        raise IOError("Unable to save the trained classifier.") from error
 
 
 def train():
@@ -180,7 +146,7 @@ def train():
     Runs the complete training pipeline.
     """
     create_directories()
-    preprocess_and_save_data()
+    split_data()
     finetune_and_save_language_model()
     train_and_save_classifier()
 
@@ -189,45 +155,53 @@ def predict_coreness(title, abstract):
     """
     Predicts class-wise probabilities given the title and abstract.
     """
-    text = title + ' <ENDTITLE> ' + abstract
-    categories = ['rejected', 'non_core', 'core']
+    text = title + " <ENDTITLE> " + abstract
+    categories = ["rejected", "non_core", "core"]
     try:
-        classifier = Classifier(data_itos_path=path_for('data_itos'),
-                                number_of_classes=3, cuda_device_id=current_app.config['CLASSIFIER_CUDA_DEVICE_ID'])
+        classifier = Classifier(
+            cuda_device_id=current_app.config["CLASSIFIER_CUDA_DEVICE_ID"]
+        )
     except IOError as error:
-        raise IOError('Data ITOS not found.') from error
+        raise IOError("Data ITOS not found.") from error
 
     try:
-        classifier.load_trained_classifier_weights(path_for('trained_classifier'))
+        classifier.load_trained_classifier_weights(path_for("trained_classifier"))
     except IOError as error:
-        raise IOError('Could not load the trained classifier weights.') from error
+        raise IOError("Could not load the trained classifier weights.") from error
 
-    class_probabilities = classifier.predict(text)
+    class_probabilities = classifier.predict(
+        text, temperature=current_app.config["CLASSIFIER_SOFTMAX_TEMPERATUR"]
+    )
     assert len(class_probabilities) == 3
 
     predicted_class = categories[np.argmax(class_probabilities)]
-    output_dict = {'prediction': predicted_class}
-    output_dict['scores'] = dict(zip(categories, class_probabilities))
+    output_dict = {"prediction": predicted_class}
+    output_dict["scores"] = dict(zip(categories, class_probabilities))
 
     return output_dict
 
 
-def validate_classifier(validation_df):
+def validate(validation_df):
+    classifier = Classifier(
+        cuda_device_id=current_app.config["CLASSIFIER_CUDA_DEVICE_ID"]
+    )
     try:
-        classifier = Classifier(data_itos_path=path_for('data_itos'),
-                                number_of_classes=3, cuda_device_id=current_app.config['CLASSIFIER_CUDA_DEVICE_ID'])
+        classifier.load_trained_classifier_weights(path_for("trained_classifier"))
     except IOError as error:
-        raise IOError('Data ITOS not found.') from error
-
-    classifier.load_trained_classifier_weights(path_for('trained_classifier'))
+        raise IOError("There was a problem loading the classifier model") from error
     predictions = []
-    true_labels = validation_df.labels.values
-    for _, row in validation_df.iterrows():
-        predicted_value = classifier.predict(row.text)
+    true_labels = []
+    validation_df = validation_df.sample(frac=1, random_state=42)
+    for _, row in tqdm(
+        validation_df.iterrows(), total=len(validation_df.labels.values)
+    ):
+        predicted_value = classifier.predict(
+            row.text, temperature=current_app.config["CLASSIFIER_SOFTMAX_TEMPERATUR"]
+        )
         predicted_class = np.argmax(predicted_value)
         predictions.append(predicted_class)
-        print(f'y pred: {predicted_class}, y true: {row.labels}')
+        true_labels.append(row.labels)
 
-    print('f1 score ', f1_score(true_labels, predictions, average='micro'))
+    print("f1 score ", f1_score(true_labels, predictions, average="micro"))
     pprint(classification_report(true_labels, predictions))
     pprint(confusion_matrix(true_labels, predictions))

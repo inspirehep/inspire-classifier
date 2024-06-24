@@ -1,0 +1,12 @@
+name: Pull request master
+
+on:
+  pull_request_target:
+    branches: [master]
+
+jobs:
+  pre-commit:
+    uses: ./.github/workflows/pre-commit.yml
+    with:
+      ref: ${{ github.event.pull_request.head.sha }}
+    secrets: inherit

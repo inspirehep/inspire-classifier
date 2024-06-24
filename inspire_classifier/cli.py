@@ -20,18 +20,14 @@
 # granted to it by virtue of its status as an Intergovernmental Organization
 # or submit itself to any jurisdiction.
 
-from copyreg import pickle
 import click
 import click_spinner
+import pandas as pd
 from flask import current_app
 from flask.cli import FlaskGroup, with_appcontext
-from inspire_classifier.api import (
-    train,
-    predict_coreness,
-    validate_classifier
-)
+
+from inspire_classifier.api import predict_coreness, train, validate
 from inspire_classifier.app import create_app
-import pandas as pd
 
 
 @click.group(cls=FlaskGroup, create_app=create_app)
@@ -39,42 +35,54 @@ def inspire_classifier():
     "INSPIRE Classifier commands"
 
 
-@inspire_classifier.command('predict-coreness')
+@inspire_classifier.command("predict-coreness")
 @with_appcontext
-@click.argument('title', type=str, required=True, nargs=1)
-@click.argument('abstract', type=str, required=True, nargs=1)
-@click.option('-b', '--base-path', type=click.Path(exists=True), required=False, nargs=1)
+@click.argument("title", type=str, required=True, nargs=1)
+@click.argument("abstract", type=str, required=True, nargs=1)
+@click.option(
+    "-b", "--base-path", type=click.Path(exists=True), required=False, nargs=1
+)
 def predict(title, abstract, base_path):
     with click_spinner.spinner():
         with current_app.app_context():
             if base_path:
-                current_app.config['CLASSIFIER_BASE_PATH'] = base_path
+                current_app.config["CLASSIFIER_BASE_PATH"] = base_path
             click.echo(predict_coreness(title, abstract))
 
 
-@inspire_classifier.command('train')
+@inspire_classifier.command("train")
 @with_appcontext
-@click.option('-l', '--language-model-epochs', type=int, required=False, nargs=1)
-@click.option('-c', '--classifier-epochs', type=int, required=False, nargs=1)
-@click.option('-b', '--base-path', type=click.Path(exists=True), required=False, nargs=1)
+@click.option("-l", "--language-model-epochs", type=int, required=False, nargs=1)
+@click.option("-c", "--classifier-epochs", type=int, required=False, nargs=1)
+@click.option(
+    "-b", "--base-path", type=click.Path(exists=True), required=False, nargs=1
+)
 def train_classifier(language_model_epochs, classifier_epochs, base_path):
     with click_spinner.spinner():
         with current_app.app_context():
             if language_model_epochs:
-                current_app.config['CLASSIFIER_LANGUAGE_MODEL_CYCLE_LENGTH'] = language_model_epochs
+                current_app.config["CLASSIFIER_LANGUAGE_MODEL_CYCLE_LENGTH"] = (
+                    language_model_epochs
+                )
             if classifier_epochs:
-                current_app.config['CLASSIFIER_CLASSIFIER_CYCLE_LENGTH'] = classifier_epochs
+                current_app.config["CLASSIFIER_CLASSIFIER_CYCLE_LENGTH"] = (
+                    classifier_epochs
+                )
             if base_path:
-                current_app.config['CLASSIFIER_BASE_PATH'] = base_path
+                current_app.config["CLASSIFIER_BASE_PATH"] = base_path
             train()
 
 
-@inspire_classifier.command('validate')
+@inspire_classifier.command("validate")
 @with_appcontext
-@click.option('-p', '--dataframe-path', type=click.Path(exists=True), required=True, nargs=1)
-@click.option('-b', '--base-path', type=click.Path(exists=True), required=False, nargs=1)
+@click.option(
+    "-p", "--dataframe-path", type=click.Path(exists=True), required=True, nargs=1
+)
+@click.option(
+    "-b", "--base-path", type=click.Path(exists=True), required=False, nargs=1
+)
 def validate_classifier(dataframe_path, base_path):
     if base_path:
-        current_app.config['CLASSIFIER_BASE_PATH'] = base_path
+        current_app.config["CLASSIFIER_BASE_PATH"] = base_path
     df = pd.read_pickle(dataframe_path)
-    validate_classifier(df)
+    validate(df)

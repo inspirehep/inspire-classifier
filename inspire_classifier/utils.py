@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of INSPIRE.
-# Copyright (C) 2014-2018 CERN.
+# Copyright (C) 2014-2024 CERN.
 #
 # INSPIRE is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -22,43 +22,59 @@
 #
 # Modified from the fastai library (https://github.com/fastai/fastai).
 
-from fastai.text import (
-    num_cpus,
-    Tokenizer
-)
-from flask import current_app
+import warnings
 from pathlib import Path
-from concurrent.futures import ProcessPoolExecutor
-import re
-from spacy.lang.en import English
-from spacy.symbols import ORTH
+
+import numpy as np
+import torch
+from fastai.text.all import clean_raw_keys, distrib_barrier, get_model, rank_distrib
+from flask import current_app
 
 
 def path_for(name):
-    base_path = Path(current_app.config.get('CLASSIFIER_BASE_PATH') or current_app.instance_path)
-    config_key = f'CLASSIFIER_{name}_PATH'.upper()
-
+    base_path = Path(
+        current_app.config.get("CLASSIFIER_BASE_PATH") or current_app.instance_path
+    )
+    config_key = f"CLASSIFIER_{name}_PATH".upper()
     return base_path / current_app.config[config_key]
 
 
-class FastLoadTokenizer(Tokenizer):
-    """
-    Tokenizer which avoids redundant loading of spacy language model
+def save_encoder_path(self, path):
+    """Save the encoder path to the config file."""
+    encoder = get_model(self.model)[0]
+    torch.save(encoder.state_dict(), path)
 
-    The FastAI Tokenizer class loads all the pipeline components of the spacy model which significantly increases
-    loading time, especially when doing inference on CPU. This class inherits from the FastAI Tokenizer and is
-    refactored to avoid redundant loading of the classifier.
-    """
-    def __init__(self):
-        self.re_br = re.compile(r'<\s*br\s*/?>', re.IGNORECASE)
-        self.tok = English()
-        for w in ('<eos>', '<bos>', '<unk>'):
-            self.tok.tokenizer.add_special_case(w, [{ORTH: w}])
 
-    def proc_all(self, ss):
-        return [self.proc_text(s) for s in ss]
+def load_encoder_path(model, path, device=None):
+    encoder = get_model(model.model)[0]
+    if device is None:
+        device = model.dls.device
+    if hasattr(encoder, "module"):
+        encoder = encoder.module
+    distrib_barrier()
+    encoder.load_state_dict(clean_raw_keys(torch.load(path)))
+    model.freeze()
+    return model
 
-    def proc_all_mp(self, ss, ncpus=None):
-        ncpus = ncpus or num_cpus() // 2
-        with ProcessPoolExecutor(ncpus) as executor:
-            return sum(executor.map(self.proc_all, ss), [])
+
+def export_classifier_path(model, path):
+    """Save the classifier path to the config file."""
+    if rank_distrib():
+        return  # don't export if child proc
+    model._end_cleanup()
+    old_dbunch = model.dls
+    model.dls = model.dls.new_empty()
+    state = model.opt.state_dict() if model.opt is not None else None
+    model.opt = None
+    with warnings.catch_warnings():
+        # To avoid the warning that come from PyTorch about model not being checked
+        warnings.simplefilter("ignore")
+        torch.save(model, path)
+    model.create_opt()
+    if state is not None:
+        model.opt.load_state_dict(state)
+    model.dls = old_dbunch
+
+
+def softmax(x, temp):
+    return np.exp(np.divide(x, temp)) / np.sum(np.exp(np.divide(x, temp)))

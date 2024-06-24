@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of INSPIRE.
-# Copyright (C) 2014-2018 CERN.
+# Copyright (C) 2014-2024 CERN.
 #
 # INSPIRE is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,11 +20,10 @@
 # granted to it by virtue of its status as an Intergovernmental Organization
 # or submit itself to any jurisdiction.
 
-from inspire_classifier import serializers
-
+import pytest
 from marshmallow.exceptions import ValidationError
 
-import pytest
+from inspire_classifier import serializers
 
 
 def test_output_serializer():
@@ -32,11 +31,7 @@ def test_output_serializer():
 
     scores = {
         "prediction": "core",
-        "scores": {
-            "rejected": 0.1,
-            "non_core": 0.2,
-            "core": 0.7
-        }
+        "scores": {"rejected": 0.1, "non_core": 0.2, "core": 0.7},
     }
 
     assert output_serializer.load(scores)
@@ -45,13 +40,7 @@ def test_output_serializer():
 def test_output_serializer_raises_exception():
     output_serializer = serializers.ClassifierOutputSerializer()
 
-    scores = {
-        "prediction": "core",
-        "scores": {
-            "rejected": 0.1,
-            "non_core": 0.2
-        }
-    }
+    scores = {"prediction": "core", "scores": {"rejected": 0.1, "non_core": 0.2}}
 
     with pytest.raises(ValidationError):
         output_serializer.load(scores)
@@ -62,12 +51,7 @@ def test_output_serializer_does_not_accept_extra_fields():
 
     scores = {
         "prediction": "core",
-        "scores": {
-            "rejected": 0.1,
-            "non_core": 0.2,
-            "core": 0.7,
-            "score4": 0.0
-        }
+        "scores": {"rejected": 0.1, "non_core": 0.2, "core": 0.7, "score4": 0.0},
     }
 
     with pytest.raises(ValidationError):
@@ -79,11 +63,7 @@ def test_output_accepts_only_certain_values_for_prediction():
 
     scores = {
         "prediction": "non-rejected",
-        "scores": {
-            "rejected": 0.1,
-            "non_core": 0.2,
-            "core": 0.7
-        }
+        "scores": {"rejected": 0.1, "non_core": 0.2, "core": 0.7},
     }
 
     with pytest.raises(ValidationError):
