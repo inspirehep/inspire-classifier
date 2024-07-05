@@ -41,7 +41,7 @@ class LanguageModel(object):
         weight_decay=1e-7,
     ):
         super(LanguageModel, self).__init__()
-        if torch.cuda.is_available() and cuda_device_id:
+        if torch.cuda.is_available() and cuda_device_id >= 0:
             torch.cuda.set_device(cuda_device_id)
         else:
             default_device(False)
@@ -93,7 +93,7 @@ class LanguageModel(object):
 
 class Classifier:
     def __init__(self, cuda_device_id):
-        if torch.cuda.is_available() and cuda_device_id:
+        if torch.cuda.is_available() and cuda_device_id >= 0:
             torch.cuda.set_device(cuda_device_id)
             self.cpu = False
         else:
