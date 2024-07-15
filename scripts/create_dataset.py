@@ -63,10 +63,12 @@ class InspireClassifierSearch(object):
 
         if index == "holdingpen-hep":
             self.source_fields = [
+                "id",
                 "metadata.abstracts",
                 "metadata.titles",
                 "metadata.inspire_categories",
             ]
+            self.id_field = "id"
             self.title_field = "metadata.titles[0].title"
             self.abstract_field = "metadata.abstracts[0].value"
             self.inspire_categories_field = "metadata.inspire_categories.term"
@@ -81,7 +83,8 @@ class InspireClassifierSearch(object):
                 ),
             ]
         else:
-            self.source_fields = ["abstracts", "titles", "inspire_categories"]
+            self.source_fields = ["id", "abstracts", "titles", "inspire_categories"]
+            self.id_field = "id"
             self.title_field = "titles[0].title"
             self.abstract_field = "abstracts[0].value"
             self.inspire_categories_field = "inspire_categories.term"
@@ -91,10 +94,12 @@ class InspireClassifierSearch(object):
             ]
 
     def _postprocess_record_data(self, record_data):
+        id = get_value(record_data, self.id_field)
         title = get_value(record_data, self.title_field)
         abstract = get_value(record_data, self.abstract_field)
         inspire_categories = get_value(record_data, self.inspire_categories_field, [])
         return {
+            "id": int(id),
             "title": title,
             "abstract": abstract,
             "inspire_categories": inspire_categories,
@@ -121,7 +126,7 @@ def get_data_for_decisions(year_from, year_to):
             record_classifier_data = inspire_search._postprocess_record_data(
                 record_es_data.to_dict()
             )
-            record_classifier_data["labels"] = DECISIONS_MAPPING[decision]["label"]
+            record_classifier_data["label"] = DECISIONS_MAPPING[decision]["label"]
             yield record_classifier_data
 
 
@@ -133,7 +138,7 @@ def prepare_inspire_classifier_dataset(data, save_data_path):
     inspire_data_df["text"] = (
         inspire_data_df["title"] + " <ENDTITLE> " + inspire_data_df["abstract"]
     )
-    inspire_classifier_data_df = inspire_data_df[["labels", "text"]]
+    inspire_classifier_data_df = inspire_data_df[["id", "inspire_categories", "label", "text"]]
     inspire_classifier_data_df.to_pickle(save_data_path)
 
 

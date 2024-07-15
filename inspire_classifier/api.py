@@ -190,18 +190,18 @@ def validate(validation_df):
     except IOError as error:
         raise IOError("There was a problem loading the classifier model") from error
     predictions = []
-    true_labels = []
     validation_df = validation_df.sample(frac=1, random_state=42)
     for _, row in tqdm(
-        validation_df.iterrows(), total=len(validation_df.labels.values)
+        validation_df.iterrows(), total=len(validation_df.label.values)
     ):
         predicted_value = classifier.predict(
             row.text, temperature=current_app.config["CLASSIFIER_SOFTMAX_TEMPERATUR"]
         )
         predicted_class = np.argmax(predicted_value)
         predictions.append(predicted_class)
-        true_labels.append(row.labels)
 
-    print("f1 score ", f1_score(true_labels, predictions, average="micro"))
-    pprint(classification_report(true_labels, predictions))
-    pprint(confusion_matrix(true_labels, predictions))
+    validation_df.insert(2, 'predicted_label', predictions)
+    validation_df.to_csv(f"{path_for('data')}/validation_results.csv", index=False)
+    print("f1 score ", f1_score(validation_df["label"], validation_df["predicted_label"], average="micro"))
+    pprint(classification_report(validation_df["label"], validation_df["predicted_label"]))
+    pprint(confusion_matrix(validation_df["label"], validation_df["predicted_label"]))

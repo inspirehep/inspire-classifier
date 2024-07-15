@@ -46,7 +46,7 @@ class LanguageModel(object):
         else:
             default_device(False)
 
-        number_of_backpropagation_through_time_steps = 70
+        number_of_backpropagation_through_time_steps = 100
 
         train_valid_data = pd.read_csv(train_valid_data_dir)
 
@@ -64,7 +64,7 @@ class LanguageModel(object):
 
         dls_lm = dblock_lm.dataloaders(
             train_valid_data,
-            bs=batch_size // 2,
+            bs=batch_size,
             num_workers=multiprocessing.cpu_count() // 2,
             pin_memory=True,
         )
@@ -88,7 +88,9 @@ class LanguageModel(object):
         self.learner.fit_one_cycle(1, 1e-2)
         self.learner.unfreeze()
         self.learner.fit_one_cycle(cycle_length, 1e-3)
+        print("language model training finished, saving encoder")
         save_encoder_path(self.learner, finetuned_language_model_encoder_save_path)
+        print("encoder saved")
 
 
 class Classifier:
@@ -108,11 +110,11 @@ class Classifier:
         train_valid_data = pd.read_csv(train_valid_data_dir)
         self.dataloader = TextDataLoaders.from_df(
             train_valid_data,
-            label_col="labels",
+            label_col="label",
             text_col="text",
             valid_col="is_valid",
             is_lm=False,
-            bs=batch_size // 2,
+            bs=batch_size,
             num_workers=multiprocessing.cpu_count() // 2,
             pin_memory=True,
             text_vocab=self.dls_lm_vocab,
@@ -152,7 +154,7 @@ class Classifier:
         self.learner.fit_one_cycle(1, slice(5e-3 / (2.6**4), 5e-3))
         self.learner.unfreeze()
         self.learner.fit_one_cycle(cycle_length, slice(1e-3 / (2.6**4), 1e-3))
-
+        print("Core classifier model training finished")
         export_classifier_path(self.learner, trained_classifier_save_path)
         self.calculate_f1_for_validation_dataset()
 
