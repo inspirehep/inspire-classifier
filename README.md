@@ -21,7 +21,9 @@ Set the enviroment variables for inspire-prod es database and run the [`create_d
 export ES_USERNAME=XXXX
 export ES_PASSWORD=XXXX
 
-poetry run python scripts/create_dataset.py --year-from $YEAR_FROM --year-to $YEAR_TO
+poetry run python scripts/create_dataset.py --year-from $YEAR_FROM --month-from $MONTH_FROM --year-to $YEAR_TO --month-to $MONTH_TO
+
+($MONTH_FROM and $MONTH_TO are optional parameters)
 ```
 
 

@@ -54,10 +54,12 @@ class LiteratureSearch(Search):
 
 
 class InspireClassifierSearch(object):
-    def __init__(self, index, query_filters, year_from, year_to):
+    def __init__(self, index, query_filters, year_from, year_to, month_from, month_to):
         self.search = LiteratureSearch(index=index)
         self.year_from = year_from
+        self.month_from = month_from
         self.year_to = year_to
+        self.month_to = month_to
 
         # Training, validation and test data
 
@@ -77,8 +79,8 @@ class InspireClassifierSearch(object):
                 & Q(
                     "range",
                     metadata__acquisition_source__datetime={
-                        "gte": self.year_from,
-                        "lt": self.year_to,
+                        "gte": f"{self.year_from}-{self.month_from}",
+                        "lt": f"{self.year_to}-{self.month_to}",
                     },
                 ),
             ]
@@ -90,7 +92,8 @@ class InspireClassifierSearch(object):
             self.inspire_categories_field = "inspire_categories.term"
             self.query_filters = [
                 query_filters
-                & Q("range", _created={"gte": self.year_from, "lt": self.year_to}),
+                & Q("range", _created={"gte": f"{self.year_from}-{self.month_from}",
+                                       "lt": f"{self.year_to}-{self.month_to}",}),
             ]
 
     def _postprocess_record_data(self, record_data):
@@ -113,13 +116,15 @@ class InspireClassifierSearch(object):
         return query
 
 
-def get_data_for_decisions(year_from, year_to):
+def get_data_for_decisions(year_from, year_to, month_from, month_to):
     for decision in DECISIONS_MAPPING:
         inspire_search = InspireClassifierSearch(
             index=DECISIONS_MAPPING[decision]["index"],
             query_filters=DECISIONS_MAPPING[decision]["filter_query"],
             year_from=year_from,
             year_to=year_to,
+            month_from=month_from,
+            month_to=month_to,
         )
         query = inspire_search.get_decision_query()
         for record_es_data in tqdm(query.scan()):
@@ -144,14 +149,23 @@ def prepare_inspire_classifier_dataset(data, save_data_path):
 
 @click.command()
 @click.option("--year-from", type=int, required=True)
+@click.option("--month-from", type=int, required=False, default=1)
 @click.option("--year-to", type=int, required=True)
-def get_inspire_classifier_dataset(year_from, year_to):
+@click.option("--month-to", type=int, required=False, default=12)
+def get_inspire_classifier_dataset(year_from, year_to, month_from, month_to):
     if year_to < year_from:
         raise ValueError("year_to must be before year_from")
+    if month_to < month_from:
+        raise ValueError("month_to must be before month_from")
+    if month_to > 12 or month_from > 12 or month_to < 1 or month_from < 1:
+        raise ValueError("month_to and month_from must be between 1 and 12")
+    month_from = f"{month_from:02d}-01"
+    month_to = f"{month_to:02d}-31"
+    print(f"Fetching {year_from}-{month_from} to {year_to}-{month_to}")
     inspire_classifier_dataset_path = os.path.join(
-        os.getcwd(), "inspire_classifier_dataset.pkl"
+        os.getcwd(), f"inspire_classifier_dataset_{year_from}-{month_from}_{year_to}-{month_to}.pkl"
     )
-    data = get_data_for_decisions(year_from, year_to)
+    data = get_data_for_decisions(year_from, year_to, month_from, month_to)
     prepare_inspire_classifier_dataset(data, inspire_classifier_dataset_path)
 
 
