@@ -151,24 +151,30 @@ def train():
     train_and_save_classifier()
 
 
-def predict_coreness(title, abstract):
+def initialize_classifier():
+    """
+    Initializes the classifier.
+    """
+    classifier = Classifier(
+        cuda_device_id=current_app.config["CLASSIFIER_CUDA_DEVICE_ID"]
+    )
+    try:
+        classifier.load_trained_classifier_weights(path_for("trained_classifier"))
+    except IOError as error:
+        raise IOError(
+            "Could not load the trained classifier weights.",
+            path_for("trained_classifier"),
+        ) from error
+
+    return classifier
+
+
+def predict_coreness(classifier, title, abstract):
     """
     Predicts class-wise probabilities given the title and abstract.
     """
     text = title + " <ENDTITLE> " + abstract
     categories = ["rejected", "non_core", "core"]
-    try:
-        classifier = Classifier(
-            cuda_device_id=current_app.config["CLASSIFIER_CUDA_DEVICE_ID"]
-        )
-    except IOError as error:
-        raise IOError("Data ITOS not found.") from error
-
-    try:
-        classifier.load_trained_classifier_weights(path_for("trained_classifier"))
-    except IOError as error:
-        raise IOError("Could not load the trained classifier weights.") from error
-
     class_probabilities = classifier.predict(
         text, temperature=current_app.config["CLASSIFIER_SOFTMAX_TEMPERATUR"]
     )
@@ -191,17 +197,22 @@ def validate(validation_df):
         raise IOError("There was a problem loading the classifier model") from error
     predictions = []
     validation_df = validation_df.sample(frac=1, random_state=42)
-    for _, row in tqdm(
-        validation_df.iterrows(), total=len(validation_df.label.values)
-    ):
+    for _, row in tqdm(validation_df.iterrows(), total=len(validation_df.label.values)):
         predicted_value = classifier.predict(
             row.text, temperature=current_app.config["CLASSIFIER_SOFTMAX_TEMPERATUR"]
         )
         predicted_class = np.argmax(predicted_value)
         predictions.append(predicted_class)
 
-    validation_df.insert(2, 'predicted_label', predictions)
+    validation_df.insert(2, "predicted_label", predictions)
     validation_df.to_csv(f"{path_for('data')}/validation_results.csv", index=False)
-    print("f1 score ", f1_score(validation_df["label"], validation_df["predicted_label"], average="micro"))
-    pprint(classification_report(validation_df["label"], validation_df["predicted_label"]))
+    print(
+        "f1 score ",
+        f1_score(
+            validation_df["label"], validation_df["predicted_label"], average="micro"
+        ),
+    )
+    pprint(
+        classification_report(validation_df["label"], validation_df["predicted_label"])
+    )
     pprint(confusion_matrix(validation_df["label"], validation_df["predicted_label"]))

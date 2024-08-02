@@ -28,7 +28,7 @@ from marshmallow import fields
 from prometheus_flask_exporter.multiprocess import GunicornInternalPrometheusMetrics
 from webargs.flaskparser import use_args
 
-from inspire_classifier.api import predict_coreness
+from inspire_classifier.api import initialize_classifier, predict_coreness
 
 from . import serializers
 
@@ -55,6 +55,8 @@ def create_app():
     app.config["CLASSIFIER_BASE_PATH"] = app.instance_path
     app.config.from_object("inspire_classifier.config")
     app.config.from_pyfile("classifier.cfg", silent=True)
+    with app.app_context():
+        classifier = initialize_classifier()
 
     @app.route("/api/health")
     def date():
@@ -69,7 +71,7 @@ def create_app():
     )
     def core_classifier(args):
         """Endpoint for the CORE classifier."""
-        prediction = predict_coreness(args["title"], args["abstract"])
+        prediction = predict_coreness(classifier, args["title"], args["abstract"])
         response = coreness_schema.dump(prediction)
         return response
 
