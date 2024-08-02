@@ -92,8 +92,13 @@ class InspireClassifierSearch(object):
             self.inspire_categories_field = "inspire_categories.term"
             self.query_filters = [
                 query_filters
-                & Q("range", _created={"gte": f"{self.year_from}-{self.month_from}",
-                                       "lt": f"{self.year_to}-{self.month_to}",}),
+                & Q(
+                    "range",
+                    _created={
+                        "gte": f"{self.year_from}-{self.month_from}",
+                        "lt": f"{self.year_to}-{self.month_to}",
+                    },
+                ),
             ]
 
     def _postprocess_record_data(self, record_data):
@@ -143,7 +148,9 @@ def prepare_inspire_classifier_dataset(data, save_data_path):
     inspire_data_df["text"] = (
         inspire_data_df["title"] + " <ENDTITLE> " + inspire_data_df["abstract"]
     )
-    inspire_classifier_data_df = inspire_data_df[["id", "inspire_categories", "label", "text"]]
+    inspire_classifier_data_df = inspire_data_df[
+        ["id", "inspire_categories", "label", "text"]
+    ]
     inspire_classifier_data_df.to_pickle(save_data_path)
 
 
@@ -163,7 +170,8 @@ def get_inspire_classifier_dataset(year_from, year_to, month_from, month_to):
     month_to = f"{month_to:02d}-31"
     print(f"Fetching {year_from}-{month_from} to {year_to}-{month_to}")
     inspire_classifier_dataset_path = os.path.join(
-        os.getcwd(), f"inspire_classifier_dataset_{year_from}-{month_from}_{year_to}-{month_to}.pkl"
+        os.getcwd(),
+        f"inspire_classifier_dataset_{year_from}-{month_from}_{year_to}-{month_to}.pkl",
     )
     data = get_data_for_decisions(year_from, year_to, month_from, month_to)
     prepare_inspire_classifier_dataset(data, inspire_classifier_dataset_path)
