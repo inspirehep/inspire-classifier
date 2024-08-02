@@ -162,7 +162,8 @@ class Classifier:
         self.model = load_learner(trained_classifier_path, cpu=self.cpu)
 
     def predict(self, text, temperature=0.25):
-        prediction_scores = self.model.predict(text)
+        with self.model.no_bar(), self.model.no_logging():
+            prediction_scores = self.model.predict(text)
         return softmax(prediction_scores[-1].numpy(), temperature)
 
     def calculate_f1_for_validation_dataset(self):
