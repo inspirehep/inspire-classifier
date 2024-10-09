@@ -46,7 +46,7 @@ def app():
         yield app
 
 
-@pytest.fixture()
+@pytest.fixture
 def app_client(app):
     return app.test_client()
 
@@ -55,9 +55,10 @@ class Mock_Learner(Learner):
     """
     Mocks the fit method of the Learner.
 
-    This is done to reduce the model training time during testing by making the fit run once (as opposed to 2 times and
-    3 times for the LanguageModel and Classifier respectively). It stores the result of the first run and then returns
-    the same result for the other times fit is run.
+    This is done to reduce the model training time during testing by making the fit
+    run once (as opposed to 2 times and 3 times for the LanguageModel and Classifier
+    respectively). It stores the result of the first run and then returns the same
+    result for the other times fit is run.
     """
 
     def fit(self, *args, **kwargs):
@@ -70,7 +71,7 @@ class Mock_Learner(Learner):
 
 @pytest.fixture(scope="session")
 @patch("fastai.text.learner.text_classifier_learner", Mock_Learner)
-def trained_pipeline(app, tmp_path_factory):
+def _trained_pipeline(app, tmp_path_factory):
     app.config["CLASSIFIER_BASE_PATH"] = tmp_path_factory.getbasetemp()
     create_directories()
     shutil.copy(

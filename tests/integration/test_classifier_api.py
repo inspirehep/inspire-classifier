@@ -24,25 +24,32 @@ import pickle
 from math import isclose
 
 import pandas as pd
+import pytest
 
 from inspire_classifier.api import predict_coreness
 from inspire_classifier.utils import path_for
 
 TEST_TITLE = "Pre-images of extreme points of the numerical range, and applications"
-TEST_ABSTRACT = "We extend the pre-image representation of exposed points of the numerical range of a matrix to all \
-extreme points. With that we characterize extreme points which are multiply generated, having at least two linearly \
-independent pre-images, as the extreme points which are Hausdorff limits of flat boundary portions on numerical ranges \
-of a sequence converging to the given matrix. These studies address the inverse numerical range map and the \
-maximum-entropy inference map which are continuous functions on the numerical range except possibly at certain \
-multiply generated extreme points. This work also allows us to describe closures of subsets of 3-by-3 matrices having \
-the same shape of the numerical range."
+TEST_ABSTRACT =\
+    ("We extend the pre-image representation of exposed points of the numerical range "
+     "of a matrix to all extreme points. With that we characterize extreme points which"
+     " are multiply generated, having at least two linearly independent pre-images,"
+     " as the extreme points which are Hausdorff limits of flat boundary portions on"
+     " numerical ranges of a sequence converging to the given matrix."
+     " These studies address the inverse numerical range map and the maximum-entropy "
+     "inference map which are continuous functions on the numerical range except "
+     "possibly at certain multiply generated extreme points. This work also allows us"
+     " to describe closures of subsets of 3-by-3 matrices having the same shape of the"
+     " numerical range.")
 
 
-def test_create_directories(trained_pipeline):
+@pytest.mark.usefixtures("_trained_pipeline")
+def test_create_directories():
     assert path_for("classifier_model").exists()
 
 
-def test_preprocess_and_save_data(app, trained_pipeline):
+@pytest.mark.usefixtures("_trained_pipeline")
+def test_preprocess_and_save_data(app):
     dataframe = pd.read_pickle(path_for("dataframe"))
 
     training_valid__csv = pd.read_csv(path_for("train_valid_data"))
@@ -60,10 +67,12 @@ def test_preprocess_and_save_data(app, trained_pipeline):
         abs_tol=1,
     )
 
-
-def test_vocab(app, trained_pipeline):
-    data_itos = pickle.load(open(path_for("data_itos"), "rb"))
-    # For performance when using mixed precision, the vocabulary is always made of size a multiple of 8, potentially by adding xxfake tokens.
+@pytest.mark.usefixtures("_trained_pipeline")
+def test_vocab(app):
+    with open(path_for("data_itos"), "rb") as file:
+        data_itos = pickle.load(file)
+    # For performance when using mixed precision, the vocabulary is always made of
+    # size a multiple of 8, potentially by adding xxfake tokens.
     adjusted_max_vocab = (
         app.config["CLASSIFIER_MAXIMUM_VOCABULARY_SIZE"]
         + 8
@@ -72,15 +81,18 @@ def test_vocab(app, trained_pipeline):
     assert len(data_itos) == adjusted_max_vocab
 
 
-def test_save_language_model(trained_pipeline):
+@pytest.mark.usefixtures("_trained_pipeline")
+def test_save_language_model():
     assert path_for("finetuned_language_model_encoder").exists()
 
 
-def test_train_and_save_classifier(trained_pipeline):
+@pytest.mark.usefixtures("_trained_pipeline")
+def test_train_and_save_classifier():
     assert path_for("trained_classifier").exists()
 
 
-def test_predict_coreness(trained_pipeline):
+@pytest.mark.usefixtures("_trained_pipeline")
+def test_predict_coreness():
     assert path_for("data_itos").exists()
     assert path_for("trained_classifier").exists()
     output_dict = predict_coreness(title=TEST_TITLE, abstract=TEST_ABSTRACT)

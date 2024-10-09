@@ -31,9 +31,11 @@ from fastai.text.all import RandomSplitter, range_of
 def split_and_save_data_for_training(dataframe_path, dest_dir, val_fraction=0.1):
     """
     Args:
-        dataframe_path: The path to the pandas dataframe containing the records. The dataframe should have one
-                        column containing the title and abstract text appended (title + abstract). The second
-                        column should contain the label as an integer (0: Rejected, 1: Non-Core, 2: Core).
+        dataframe_path: The path to the pandas dataframe containing the records.
+                        The dataframe should have one column containing the title and
+                        abstract text appended (title + abstract). The second column
+                         should contain the label as an integer
+                         (0: Rejected, 1: Non-Core, 2: Core).
         dest_dir: Directory to save the training/validation csv.
         val_fraction: the fraction of data to use as the validation set.
     """
