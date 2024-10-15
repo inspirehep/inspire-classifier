@@ -56,9 +56,9 @@ def split_data():
         )
     except IOError as error:
         raise IOError(
-            "Training dataframe not found. Make sure the file is present in the right directory. "
-            "Please use the path specified in config.py for CLASSIFIER_DATAFRAME_PATH relative to the "
-            "CLASSIFIER_BASE_PATH."
+            "Training dataframe not found. Make sure the file is present in the right "
+            "directory. Please use the path specified in config.py for "
+            "CLASSIFIER_DATAFRAME_PATH relative to the CLASSIFIER_BASE_PATH."
         ) from error
 
 
@@ -93,8 +93,8 @@ def finetune_and_save_language_model():
         )
     except IOError as error:
         raise IOError(
-            "Unable to save the finetuned language model. Please check that the language model data directory "
-            "exists."
+            "Unable to save the finetuned language model. Please check that the "
+            "language model data directory exists."
         ) from error
 
 
@@ -182,7 +182,7 @@ def predict_coreness(classifier, title, abstract):
 
     predicted_class = categories[np.argmax(class_probabilities)]
     output_dict = {"prediction": predicted_class}
-    output_dict["scores"] = dict(zip(categories, class_probabilities))
+    output_dict["scores"] = dict(zip(categories, class_probabilities, strict=False))
 
     return output_dict
 

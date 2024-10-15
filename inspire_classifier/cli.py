@@ -43,11 +43,10 @@ def inspire_classifier():
     "-b", "--base-path", type=click.Path(exists=True), required=False, nargs=1
 )
 def predict(title, abstract, base_path):
-    with click_spinner.spinner():
-        with current_app.app_context():
-            if base_path:
-                current_app.config["CLASSIFIER_BASE_PATH"] = base_path
-            click.echo(predict_coreness(title, abstract))
+    with click_spinner.spinner(),current_app.app_context():
+        if base_path:
+            current_app.config["CLASSIFIER_BASE_PATH"] = base_path
+        click.echo(predict_coreness(title, abstract))
 
 
 @inspire_classifier.command("train")
@@ -58,19 +57,18 @@ def predict(title, abstract, base_path):
     "-b", "--base-path", type=click.Path(exists=True), required=False, nargs=1
 )
 def train_classifier(language_model_epochs, classifier_epochs, base_path):
-    with click_spinner.spinner():
-        with current_app.app_context():
-            if language_model_epochs:
-                current_app.config["CLASSIFIER_LANGUAGE_MODEL_CYCLE_LENGTH"] = (
-                    language_model_epochs
-                )
-            if classifier_epochs:
-                current_app.config["CLASSIFIER_CLASSIFIER_CYCLE_LENGTH"] = (
-                    classifier_epochs
-                )
-            if base_path:
-                current_app.config["CLASSIFIER_BASE_PATH"] = base_path
-            train()
+    with click_spinner.spinner(),current_app.app_context():
+        if language_model_epochs:
+            current_app.config["CLASSIFIER_LANGUAGE_MODEL_CYCLE_LENGTH"] = (
+                language_model_epochs
+            )
+        if classifier_epochs:
+            current_app.config["CLASSIFIER_CLASSIFIER_CYCLE_LENGTH"] = (
+                classifier_epochs
+            )
+        if base_path:
+            current_app.config["CLASSIFIER_BASE_PATH"] = base_path
+        train()
 
 
 @inspire_classifier.command("validate")
