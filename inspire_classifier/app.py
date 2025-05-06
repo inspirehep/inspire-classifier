@@ -48,7 +48,7 @@ def create_app(instance_path=None):
     app = Flask(
         __name__,
         instance_relative_config=True,
-        instance_path= instance_path if instance_path else 
+        instance_path= instance_path if instance_path else
         "/opt/conda/var/inspire_classifier.app-instance",
     )
     app.config["CLASSIFIER_BASE_PATH"] = app.instance_path

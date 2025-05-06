@@ -56,6 +56,7 @@ poetry run python scripts/upload_to_s3.py
 
 
 ## How to run
-For testing, the cli of the classifier can be used via `poetry run inspire-classifier 'example title' 'exmaple abstract'`, with the `-b` flag, the basepath to check for the training data, can be passed (which currently should be `-b classifier`).
+For testing, the cli of the classifier can be used via `poetry run inspire-classifier predict-coreness 'example title' 'exmaple abstract'`. For this, a trained model with the name `trained_classifier_model.h5` must be located in the following folder of the package:
+`inspire_classifier/models/classifier_model/`
 
 In the production, the api is used to predict the 'coreness' of records using the `/api/predict/coreness` endpoint and passing `title` and `abstract` as json fields in a POST request (see [this file](inspire_classifier/app.py) for details).
