@@ -46,4 +46,4 @@ RUN poetry install --without dev
 RUN poetry run pip install torch==2.3.1+cpu -f https://download.pytorch.org/whl/torch_stable.html fastai==2.7.15
 
 
-CMD ["poetry", "run", "gunicorn", "-b", ":5000", "--access-logfile", "-", "--error-logfile", "-", "inspire_classifier.app:app", "--timeout 90"]
+CMD ["poetry", "run", "gunicorn", "-b", ":5000", "--access-logfile", "-", "--error-logfile", "-", "inspire_classifier.flask_app:app", "--timeout 90"]

@@ -28,14 +28,14 @@ DECISIONS_MAPPING = {
 
 class LiteratureSearch(Search):
     connection_holdingpen = connections.create_connection(
-        hosts=["https://os-inspire-legacy-os1.cern.ch/es"],
+        hosts=["https://os-inspire-legacy-os1.cern.ch/os"],
         timeout=30,
         http_auth=(os.environ["ES_USERNAME"], os.environ["ES_PASSWORD"]),
         verify_certs=False,
         use_ssl=True,
     )
     connection_inspirehep = connections.create_connection(
-        hosts=["https://os-inspire-prod.cern.ch/es"],
+        hosts=["https://os-inspire-prod.cern.ch/os"],
         timeout=30,
         http_auth=(os.environ["ES_USERNAME"], os.environ["ES_PASSWORD"]),
         verify_certs=False,

@@ -21,11 +21,9 @@
 # or submit itself to any jurisdiction.
 
 import datetime
-import logging
 
 from flask import Flask, Response, jsonify
 from marshmallow import fields
-from prometheus_flask_exporter.multiprocess import GunicornInternalPrometheusMetrics
 from webargs.flaskparser import use_args
 
 from inspire_classifier import serializers
@@ -43,14 +41,15 @@ class JsonResponse(Response):
         return super(JsonResponse, cls).force_type(rv, environ)
 
 
-def create_app():
+def create_app(instance_path=None):
     Flask.response_class = JsonResponse
     coreness_schema = serializers.ClassifierOutputSerializer()
     # TODO instance path should be removed... but needs changes in deployment file
     app = Flask(
         __name__,
         instance_relative_config=True,
-        instance_path="/opt/conda/var/inspire_classifier.app-instance",
+        instance_path= instance_path if instance_path else 
+        "/opt/conda/var/inspire_classifier.app-instance",
     )
     app.config["CLASSIFIER_BASE_PATH"] = app.instance_path
     app.config.from_object("inspire_classifier.config")
@@ -81,14 +80,3 @@ def create_app():
     @app.errorhandler(404)
     def page_not_found(e):
         return {"errors": [str(e)]}, 404
-
-
-app = create_app()
-
-if app.config.get("PROMETHEUS_ENABLE_EXPORTER_FLASK"):
-    logging.info("Starting prometheus metrics exporter")
-    metrics = GunicornInternalPrometheusMetrics.for_app_factory()
-    metrics.init_app(app)
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0")

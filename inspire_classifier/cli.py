@@ -20,17 +20,25 @@
 # granted to it by virtue of its status as an Intergovernmental Organization
 # or submit itself to any jurisdiction.
 
+import os
+
 import click
 import click_spinner
 import pandas as pd
 from flask import current_app
 from flask.cli import FlaskGroup, with_appcontext
 
-from inspire_classifier.api import predict_coreness, train, validate
+from inspire_classifier.api import (
+    initialize_classifier,
+    predict_coreness,
+    train,
+    validate,
+)
 from inspire_classifier.app import create_app
 
 
-@click.group(cls=FlaskGroup, create_app=create_app)
+@click.group(cls=FlaskGroup, create_app=lambda: create_app(
+    os.path.dirname(os.path.abspath(__file__))))
 def inspire_classifier():
     "INSPIRE Classifier commands"
 
@@ -43,10 +51,11 @@ def inspire_classifier():
     "-b", "--base-path", type=click.Path(exists=True), required=False, nargs=1
 )
 def predict(title, abstract, base_path):
+    classifier = initialize_classifier()
     with click_spinner.spinner(),current_app.app_context():
         if base_path:
             current_app.config["CLASSIFIER_BASE_PATH"] = base_path
-        click.echo(predict_coreness(title, abstract))
+        click.echo(predict_coreness(classifier, title, abstract))
 
 
 @inspire_classifier.command("train")
