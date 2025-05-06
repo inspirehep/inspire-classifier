@@ -38,7 +38,9 @@ from inspire_classifier.app import create_app
 
 
 @click.group(cls=FlaskGroup, create_app=lambda: create_app(
-    os.path.dirname(os.path.abspath(__file__))))
+    os.path.dirname(os.path.abspath(__file__)),
+    train=os.getenv("TRAIN_MODE", "false").lower() == "true"
+))
 def inspire_classifier():
     "INSPIRE Classifier commands"
 

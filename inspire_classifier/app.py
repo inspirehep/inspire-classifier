@@ -41,7 +41,7 @@ class JsonResponse(Response):
         return super(JsonResponse, cls).force_type(rv, environ)
 
 
-def create_app(instance_path=None):
+def create_app(instance_path=None, train=False):
     Flask.response_class = JsonResponse
     coreness_schema = serializers.ClassifierOutputSerializer()
     # TODO instance path should be removed... but needs changes in deployment file
@@ -55,7 +55,8 @@ def create_app(instance_path=None):
     app.config.from_object("inspire_classifier.config")
     app.config.from_pyfile("classifier.cfg", silent=True)
     with app.app_context():
-        classifier = initialize_classifier()
+        if not train:
+            classifier = initialize_classifier()
 
     @app.route("/api/health")
     def date():

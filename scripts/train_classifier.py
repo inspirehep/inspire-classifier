@@ -46,7 +46,7 @@ def train_classifier(
     print("-----------------")
 
     os.system(
-        f"inspire-classifier train -b classifier "
+        f"TRAIN_MODE=true inspire-classifier train -b classifier "
         f"--classifier-epochs {number_of_classifier_epochs} "
         f"--language-model-epochs {number_of_lanuage_model_epochs}"
     )
