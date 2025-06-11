@@ -167,7 +167,7 @@ def get_inspire_classifier_dataset(year_from, year_to, month_from, month_to):
     if month_to > 12 or month_from > 12 or month_to < 1 or month_from < 1:
         raise ValueError("month_to and month_from must be between 1 and 12")
     month_from = f"{month_from:02d}-01"
-    month_to = f"{month_to:02d}-31"
+    month_to = f"{month_to:02d}-01"
     print(f"Fetching {year_from}-{month_from} to {year_to}-{month_to}")
     inspire_classifier_dataset_path = os.path.join(
         os.getcwd(),

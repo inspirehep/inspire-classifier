@@ -26,7 +26,7 @@ from math import isclose
 import pandas as pd
 import pytest
 
-from inspire_classifier.api import predict_coreness
+from inspire_classifier.api import initialize_classifier, predict_coreness
 from inspire_classifier.utils import path_for
 
 TEST_TITLE = "Pre-images of extreme points of the numerical range, and applications"
@@ -95,7 +95,8 @@ def test_train_and_save_classifier():
 def test_predict_coreness():
     assert path_for("data_itos").exists()
     assert path_for("trained_classifier").exists()
-    output_dict = predict_coreness(title=TEST_TITLE, abstract=TEST_ABSTRACT)
+    classifier = initialize_classifier()
+    output_dict = predict_coreness(classifier, TEST_TITLE, TEST_ABSTRACT)
 
     assert set(output_dict.keys()) == {"prediction", "scores"}
     assert output_dict["prediction"] in {"rejected", "non_core", "core"}

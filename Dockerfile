@@ -39,6 +39,7 @@ RUN poetry remove fastai
 RUN poetry install --without dev --no-root && rm -rf $POETRY_CACHE_DIR
 
 COPY inspire_classifier inspire_classifier/
+COPY tests tests/
 # COPY classifier/ app/instance/
 RUN poetry install --without dev
 

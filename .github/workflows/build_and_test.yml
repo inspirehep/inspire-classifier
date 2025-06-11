@@ -1,4 +1,4 @@
-name: Build
+name: Build and test
 
 on:
   workflow_call:
@@ -55,3 +55,9 @@ jobs:
             type=ref,event=tag
           username: ${{ secrets.HARBOR_USERNAME }}
           password: ${{ secrets.HARBOR_SECRET }}
+        
+      - name: Run tests
+        run: |
+          docker run --rm
+            ${{ inputs.image }} \
+            poetry run pytest tests/

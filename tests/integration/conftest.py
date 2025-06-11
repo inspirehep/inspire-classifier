@@ -34,7 +34,7 @@ from inspire_classifier.utils import path_for
 
 @pytest.fixture(autouse=True, scope="session")
 def app():
-    app = create_app()
+    app = create_app(train=True)
     with app.app_context():
         app.config["CLASSIFIER_MAXIMUM_VOCABULARY_SIZE"] = 500
         app.config["CLASSIFIER_MINIMUM_WORD_FREQUENCY"] = 1
@@ -50,6 +50,11 @@ def app():
 def app_client(app):
     return app.test_client()
 
+@pytest.fixture
+def trained_app_client(app, tmp_path_factory):
+    app = create_app(train=False, instance_path=tmp_path_factory.getbasetemp())
+    with app.app_context():
+        return app.test_client()
 
 class Mock_Learner(Learner):
     """

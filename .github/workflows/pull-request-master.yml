@@ -10,3 +10,10 @@ jobs:
     with:
       ref: ${{ github.event.pull_request.head.sha }}
     secrets: inherit
+  build_and_test:
+    uses: ./.github/workflows/build_and_test.yml
+    with:
+      ref: ${{ github.event.pull_request.head.sha }}
+      image: cern-sis/inspire/classifier
+      context: .
+    secrets: inherit

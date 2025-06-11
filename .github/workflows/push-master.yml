@@ -1,24 +1,29 @@
 name: Push master
 
-on: workflow_dispatch
-#  push:
-#    branches: [master]
+on:
+  push:
+    branches: [master]
 
 defaults:
   run:
     shell: bash
 
 jobs:
-  build:
-    uses: ./.github/workflows/build.yml
+  pre-commit:
+    uses: ./.github/workflows/pre-commit.yml
     with:
-      ref: ${{ inputs.ref }}
+      ref: ${{ github.sha }}
+    secrets: inherit
+  build_and_test:
+    uses: ./.github/workflows/build_and_test.yml
+    with:
+      ref: ${{ github.sha }}
       image: cern-sis/inspire/classifier
       context: .
     secrets: inherit
 
   deploy:
-    needs: build
+    needs: build_and_test
     runs-on: ubuntu-latest
     steps:
       - name: send event
@@ -26,5 +31,5 @@ jobs:
         with:
           event-type: update
           images: |
-            cern-sis/inspire/classifier@${{ needs.build.outputs.image-id }}
+            cern-sis/inspire/classifier@${{ needs.build_and_test.outputs.image-id }}
           token: ${{ secrets.PAT_FIRE_EVENTS_ON_CERN_SIS_KUBERNETES }}
