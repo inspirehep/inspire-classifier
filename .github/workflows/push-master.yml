@@ -45,7 +45,6 @@ jobs:
             registry.cern.ch/cern-sis/inspire/classifier@${{ steps.build.outputs.image-id }} \
             poetry run pytest tests/
 
-
   deploy:
     needs: build_and_test
     runs-on: ubuntu-latest
