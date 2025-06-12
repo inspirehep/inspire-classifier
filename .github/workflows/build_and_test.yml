@@ -61,7 +61,7 @@ jobs:
             type=ref,event=tag
           username: ${{ inputs.push && secrets.HARBOR_USERNAME || '' }}
           password: ${{ inputs.push && secrets.HARBOR_PASSWORD || '' }}
- 
+
       - name: Run tests
         run: |
           docker run --rm \
