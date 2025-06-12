@@ -34,7 +34,7 @@ on:
         value: ${{ jobs.build.outputs.image-id }}
 
 jobs:
-  build:
+  build-and-test:
     runs-on: ubuntu-latest
     outputs:
       image-id: ${{ steps.build.outputs.image-id }}
