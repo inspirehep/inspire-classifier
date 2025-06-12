@@ -64,6 +64,6 @@ jobs:
 
       - name: Run tests
         run: |
-          docker run --rm
+          docker run --rm \
             ${{ steps.build.outputs.image-id }} \
             poetry run pytest tests/
