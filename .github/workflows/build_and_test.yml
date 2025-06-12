@@ -31,7 +31,7 @@ on:
     outputs:
       image-id:
         description: The ID of image that has been built
-        value: ${{ jobs.build.outputs.image-id }}
+        value: ${{ jobs.build-and-test.outputs.image-id }}
 
 jobs:
   build-and-test:
@@ -65,5 +65,5 @@ jobs:
       - name: Run tests
         run: |
           docker run --rm
-            ${{ inputs.image }} \
+            ${{ steps.build.outputs.image-id }} \
             poetry run pytest tests/
