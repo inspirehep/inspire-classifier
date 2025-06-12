@@ -16,4 +16,5 @@ jobs:
       ref: ${{ github.event.pull_request.head.sha }}
       image: cern-sis/inspire/classifier
       context: .
+      push: false
     secrets: inherit
