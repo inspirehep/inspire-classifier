@@ -18,6 +18,8 @@ jobs:
   build_and_test:
     needs: pre-commit
     runs-on: ubuntu-latest
+    outputs:
+      image-id: ${{ steps.build.outputs.image-id }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -40,7 +42,7 @@ jobs:
       - name: Test image
         run: |
           docker run --rm \
-            registry.cern.ch/cern-sis/inspire/classifier:${{ steps.build.outputs.image-id }} \
+            registry.cern.ch/cern-sis/inspire/classifier@${{ steps.build.outputs.image-id }} \
             poetry run pytest tests/
 
 
