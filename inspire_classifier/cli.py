@@ -1,97 +1,123 @@
-# -*- coding: utf-8 -*-
-#
-# This file is part of INSPIRE.
-# Copyright (C) 2014-2019 CERN.
-#
-# INSPIRE is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# INSPIRE is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with INSPIRE. If not, see <http://www.gnu.org/licenses/>.
-#
-# In applying this license, CERN does not waive the privileges and immunities
-# granted to it by virtue of its status as an Intergovernmental Organization
-# or submit itself to any jurisdiction.
-
 import os
 
 import click
 import click_spinner
 import pandas as pd
-from flask import current_app
-from flask.cli import FlaskGroup, with_appcontext
 
-from inspire_classifier.api import (
-    initialize_classifier,
-    predict_coreness,
-    train,
-    validate,
-)
-from inspire_classifier.app import create_app
+from inspire_classifier.core.api import train, validate
+from inspire_classifier.core.model import Classifier
+from inspire_classifier.core.utils import get_classifier_model_path, get_data_path
 
 
-@click.group(cls=FlaskGroup, create_app=lambda: create_app(
-    os.path.dirname(os.path.abspath(__file__)),
-    train=os.getenv("TRAIN_MODE", "false").lower() == "true"
-))
-def inspire_classifier():
+@click.group()
+def inspire_classifier():  # noqa: F811
     "INSPIRE Classifier commands"
 
 
 @inspire_classifier.command("predict-coreness")
-@with_appcontext
 @click.argument("title", type=str, required=True, nargs=1)
 @click.argument("abstract", type=str, required=True, nargs=1)
 @click.option(
-    "-b", "--base-path", type=click.Path(exists=True), required=False, nargs=1
+    "-b",
+    "--base-path",
+    type=click.Path(exists=True),
+    required=False,
+    nargs=1,
+    default=os.path.join(os.getcwd(), "inspire_classifier"),
 )
 def predict(title, abstract, base_path):
-    classifier = initialize_classifier()
-    with click_spinner.spinner(),current_app.app_context():
-        if base_path:
-            current_app.config["CLASSIFIER_BASE_PATH"] = base_path
-        click.echo(predict_coreness(classifier, title, abstract))
+    classifier = Classifier(model_path=get_classifier_model_path(base_path))
+    with click_spinner.spinner():
+        click.echo(classifier.predict_coreness(title, abstract))
 
 
 @inspire_classifier.command("train")
-@with_appcontext
-@click.option("-l", "--language-model-epochs", type=int, required=False, nargs=1)
-@click.option("-c", "--classifier-epochs", type=int, required=False, nargs=1)
 @click.option(
-    "-b", "--base-path", type=click.Path(exists=True), required=False, nargs=1
+    "-b",
+    "--base-path",
+    type=click.Path(exists=True),
+    required=False,
+    nargs=1,
+    default=os.path.join(os.getcwd(), "inspire_classifier"),
 )
-def train_classifier(language_model_epochs, classifier_epochs, base_path):
-    with click_spinner.spinner(),current_app.app_context():
-        if language_model_epochs:
-            current_app.config["CLASSIFIER_LANGUAGE_MODEL_CYCLE_LENGTH"] = (
-                language_model_epochs
-            )
-        if classifier_epochs:
-            current_app.config["CLASSIFIER_CLASSIFIER_CYCLE_LENGTH"] = (
-                classifier_epochs
-            )
-        if base_path:
-            current_app.config["CLASSIFIER_BASE_PATH"] = base_path
-        train()
+@click.option("-d", "--cuda-device-id", type=int, required=False, nargs=1, default=0)
+@click.option("-v", "--val-fraction", type=float, required=False, nargs=1, default=0.1)
+@click.option(
+    "-l", "--language-model-epochs", type=int, required=False, nargs=1, default=15
+)
+@click.option(
+    "-lb", "--language-model-batch-size", type=int, required=False, nargs=1, default=64
+)
+@click.option(
+    "-mwf", "--minimum-word-frequency", type=int, required=False, nargs=1, default=2
+)
+@click.option(
+    "-mvs",
+    "--maximum-vocabulary-size",
+    type=int,
+    required=False,
+    nargs=1,
+    default=60000,
+)
+@click.option(
+    "-c", "--classifier-epochs", type=int, required=False, nargs=1, default=15
+)
+@click.option(
+    "-cb", "--classifier-batch-size", type=int, required=False, nargs=1, default=128
+)
+def train_classifier(
+    base_path,
+    cuda_device_id,
+    val_fraction,
+    language_model_epochs,
+    language_model_batch_size,
+    minimum_word_frequency,
+    maximum_vocabulary_size,
+    classifier_epochs,
+    classifier_batch_size,
+):
+    with click_spinner.spinner():
+        train(
+            base_path=base_path,
+            cuda_device_id=cuda_device_id,
+            val_fraction=val_fraction,
+            language_model_batch_size=language_model_batch_size,
+            minimum_word_frequency=minimum_word_frequency,
+            maximum_vocabulary_size=maximum_vocabulary_size,
+            language_model_cycle_length=language_model_epochs,
+            classifier_batch_size=classifier_batch_size,
+            classifier_cycle_length=classifier_epochs,
+        )
 
 
 @inspire_classifier.command("validate")
-@with_appcontext
 @click.option(
-    "-p", "--dataframe-path", type=click.Path(exists=True), required=True, nargs=1
+    "-p",
+    "--dataframe-path",
+    type=click.Path(exists=True),
+    required=False,
+    nargs=1,
+    default=get_data_path(
+        os.path.join(os.getcwd(), "inspire_classifier"), "test_data.df"
+    ),
 )
 @click.option(
-    "-b", "--base-path", type=click.Path(exists=True), required=False, nargs=1
+    "-b",
+    "--base-path",
+    type=click.Path(exists=True),
+    required=False,
+    nargs=1,
+    default=os.path.join(os.getcwd(), "inspire_classifier"),
 )
-def validate_classifier(dataframe_path, base_path):
-    if base_path:
-        current_app.config["CLASSIFIER_BASE_PATH"] = base_path
+@click.option("-d", "--cuda-device-id", type=int, required=False, nargs=1, default=0)
+@click.option(
+    "-t", "--softmax-temperature", type=float, required=False, nargs=1, default=0.25
+)
+def validate_classifier(dataframe_path, base_path, cuda_device_id, softmax_temperature):
     df = pd.read_pickle(dataframe_path)
-    validate(df)
+    validate(
+        df,
+        base_path=base_path,
+        cuda_device_id=cuda_device_id,
+        softmax_temperature=softmax_temperature,
+    )

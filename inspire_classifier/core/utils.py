@@ -22,21 +22,12 @@
 #
 # Modified from the fastai library (https://github.com/fastai/fastai).
 
+import os
 import warnings
-from pathlib import Path
 
 import numpy as np
 import torch
 from fastai.text.all import clean_raw_keys, distrib_barrier, get_model, rank_distrib
-from flask import current_app
-
-
-def path_for(name):
-    base_path = Path(
-        current_app.config.get("CLASSIFIER_BASE_PATH") or current_app.instance_path
-    )
-    config_key = f"CLASSIFIER_{name}_PATH".upper()
-    return base_path / current_app.config[config_key]
 
 
 def save_encoder_path(self, path):
@@ -78,3 +69,19 @@ def export_classifier_path(model, path):
 
 def softmax(x, temp):
     return np.exp(np.divide(x, temp)) / np.sum(np.exp(np.divide(x, temp)))
+
+
+def get_data_path(base_path, filename):
+    return os.path.join(base_path, "data", filename)
+
+
+def _get_model_path(base_path, model_type, filename):
+    return os.path.join(base_path, "models", model_type, filename)
+
+
+def get_language_model_path(base_path, filename="finetuned_language_model_encoder.h5"):
+    return _get_model_path(base_path, "language_model", filename)
+
+
+def get_classifier_model_path(base_path, filename="classifier.h5"):
+    return _get_model_path(base_path, "classifier_model", filename)

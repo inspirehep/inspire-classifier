@@ -6,8 +6,20 @@ INSPIRE module aimed at automatically classifying the new papers that are added 
 The current implemntation uses the ULMfit approach. Universal Language Model Fine-tuning, is a method for training text classifiers by first pretraining a language model on a large corpus to learn general language features (in this case a pre-loaded model, which was trained using the WikiText-103 dataset is used). The pretrained model is then fine-tuned on the title and abstract of the inpsire dataset before training the classifier on top.
 
 
+## Package Usage
+```
+from inspire_classifier import Classifier
+classifier = Classifier(model_path="PATH/TO/MODEL.h5")
+title = "Search for new physics in high-energy particle collisions"
+abstract = "We present results from a search for beyond..."
+result = classifier.predict_coreness(title, abstract)
+print(result) --> {'prediction': 'core', 'score': 0.85}
+```
 
-## Installation:
+
+
+
+## Installation for local usage and Training:
 * Install and activate `python 3.11` enviroment (for exmaple using pyenv)
 * Install poetry: `pip install poetry==1.8.3`
 * Run poetry install: `poetry install`
@@ -15,7 +27,7 @@ The current implemntation uses the ULMfit approach. Universal Language Model Fin
 
 ## Train and upload new classifier model
 ### 1. Gather training data
-Set the enviroment variables for inspire-prod es database and run the [`create_dataset.py`](scripts/create_dataset.py) file, passing the range of years. This will create a `inspire_classifier_dataset.pkl`, containing the label (core, non-core, rejected) as well as the title and abstract of the fetched records. This data will be used in the next step to train the model.
+Set the enviroment variables for inspire-prod es database and run the [`create_dataset.py`](scripts/create_dataset.py) file, passing the range of years. This will create a `inspire_classifier_dataset.pkl`, containing the label (core, non-core, rejected) as well as the title and abstract of the fetched records. This data will be used in the next step to train the model. Make sure the generated file is called  `inspire_classifier_dataset.pkl`!
 
 ```
 export ES_USERNAME=XXXX
@@ -33,25 +45,6 @@ The [`train_classifier.py`](scripts/train_classifier.py) script will run the com
 ```
 poetry run python scripts/train_classifier.py
 ```
-
-
-### 3. Upload model
-The final step is to upload the new model to the s3 bucket and change the config file in the deployment, so after a redeployment, the pods make use of the new classifier model. Either use `rclone copy` to transfer the file into the s3 bucket or use the `upload_to_s3.py` script (small adjustments like adding the credential are needed).
-
-```
-poetry run python scripts/upload_to_s3.py
-```
-
-
-
-## How to build and deploy new classifier image:
-**Currently new images have to deployed on [dockerhub](https://hub.docker.com/r/inspirehep/classifier). This is subject to change as images should go to the harbor registry, but changes in deployment are needed first**
-
-1. Build docker image: `docker build -t inspirehep/classifier:<NEW TAG> .`
-2. Login with inspirehep user on dockerhub: `docker login`
-3. Push image to dockerhub: `docker push inspirehep/classifier:<NEW TAG>`
-4. Change `newTag` in the `kustomization.yml` file in the [k8s repo](https://github.com/cern-sis/kubernetes/tree/master/classifier).
-
 
 
 

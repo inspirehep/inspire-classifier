@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 import pandas as pd
 
@@ -7,11 +8,8 @@ def train_classifier(
     text_path,
     train_test_split,
     number_of_classifier_epochs,
-    number_of_lanuage_model_epochs,
+    number_of_language_model_epochs,
 ):
-
-    os.makedirs(os.path.join(os.getcwd(), "classifier", "data"), exist_ok=True)
-
     df = pd.read_pickle(text_path)
     df = df.sample(frac=1, random_state=42).reset_index(drop=True)
     print(df["label"].value_counts())
@@ -30,8 +28,12 @@ def train_classifier(
     test_df = grouped_test_df.reset_index(drop=True)
     df = grouped_df.reset_index(drop=True)
 
-    df.to_pickle(os.path.join("classifier/data", "train_valid_data.df"))
-    test_df.to_pickle(os.path.join("classifier/data", "test_data.df"))
+    package_data_dir = Path(__file__).parent.parent / "inspire_classifier" / "data"
+    package_data_dir.mkdir(parents=True, exist_ok=True)
+
+    # Save dataframes to the package data folder
+    df.to_pickle(package_data_dir / "train_valid_data.df")
+    test_df.to_pickle(package_data_dir / "test_data.df")
 
     print("-----------------")
     print("Inspire Data:")
@@ -46,19 +48,16 @@ def train_classifier(
     print("-----------------")
 
     os.system(
-        f"TRAIN_MODE=true inspire-classifier train -b classifier "
-        f"--classifier-epochs {number_of_classifier_epochs} "
-        f"--language-model-epochs {number_of_lanuage_model_epochs}"
+        f"inspire-classifier train --classifier-epochs {number_of_classifier_epochs} \
+            --language-model-epochs {number_of_language_model_epochs}"
     )
     print("training finished successfully!")
-    os.system(
-        "inspire-classifier validate -b classifier -p classifier/data/test_data.df"
-    )
+    os.system("poetry run inspire-classifier validate")
 
 
 # Adjust necessary data
-NUMBER_OF_CLASSIFIER_EPOCHS = 10
-NUMBER_OF_LANGUAGE_MODEL_EPOCHS = 10
+NUMBER_OF_CLASSIFIER_EPOCHS = 1
+NUMBER_OF_LANGUAGE_MODEL_EPOCHS = 1
 TRAIN_TEST_SPLIT = 0.8
 
 train_classifier(
