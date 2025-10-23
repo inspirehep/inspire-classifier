@@ -20,6 +20,14 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install poetry
           poetry install
+      
+      - name: Auto bump version
+        run: |
+          poetry version patch
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git commit -am "Bump version [skip ci]" || echo "No changes"
+          git push
 
       - name: Build package
         run: |

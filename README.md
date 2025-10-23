@@ -1,33 +1,35 @@
 # Inspire Classifier
 
 ## About
-INSPIRE module aimed at automatically classifying the new papers that are added to INSPIRE, such as if they are core or not, or the arXiv category corresponding to each of them.
+INSPIRE package aimed to automatically classify the new papers that are added to INSPIRE, such as if they are core or not.
 
-The current implemntation uses the ULMfit approach. Universal Language Model Fine-tuning, is a method for training text classifiers by first pretraining a language model on a large corpus to learn general language features (in this case a pre-loaded model, which was trained using the WikiText-103 dataset is used). The pretrained model is then fine-tuned on the title and abstract of the inpsire dataset before training the classifier on top.
+The current implementation uses the ULMfit approach. Universal Language Model Fine-tuning, is a method for training text classifiers by first pre-training a language model on a large corpus to learn general language features (in this case a pre-loaded model, which was trained using the WikiText-103 dataset is used). The pre-trained model is then fine-tuned on the title and abstract of the INSPIRE dataset before training the classifier on top.
 
 
 ## Package Usage
 ```
 from inspire_classifier import Classifier
+
 classifier = Classifier(model_path="PATH/TO/MODEL.h5")
+
 title = "Search for new physics in high-energy particle collisions"
 abstract = "We present results from a search for beyond..."
+
 result = classifier.predict_coreness(title, abstract)
 print(result) --> {'prediction': 'core', 'score': 0.85}
 ```
 
 
 
-
 ## Installation for local usage and Training:
-* Install and activate `python 3.11` enviroment (for exmaple using pyenv)
+* Install and activate `python 3.11` environment (for example using pyenv)
 * Install poetry: `pip install poetry==1.8.3`
 * Run poetry install: `poetry install`
 
 
-## Train and upload new classifier model
+## Train new classifier model
 ### 1. Gather training data
-Set the enviroment variables for inspire-prod es database and run the [`create_dataset.py`](scripts/create_dataset.py) file, passing the range of years. This will create a `inspire_classifier_dataset.pkl`, containing the label (core, non-core, rejected) as well as the title and abstract of the fetched records. This data will be used in the next step to train the model. Make sure the generated file is called  `inspire_classifier_dataset.pkl`!
+Set the environment variables for inspire-prod es database and run the [`create_dataset.py`](scripts/create_dataset.py) file, passing the range of years. This will create a `inspire_classifier_dataset.pkl`, containing the label (core, non-core, rejected) as well as the title and abstract of the fetched records. This data will be used in the next step to train the model. Make sure the generated file is called  `inspire_classifier_dataset.pkl`!
 
 ```
 export ES_USERNAME=XXXX
@@ -45,11 +47,3 @@ The [`train_classifier.py`](scripts/train_classifier.py) script will run the com
 ```
 poetry run python scripts/train_classifier.py
 ```
-
-
-
-## How to run
-For testing, the cli of the classifier can be used via `poetry run inspire-classifier predict-coreness 'example title' 'exmaple abstract'`. For this, a trained model with the name `trained_classifier_model.h5` must be located in the following folder of the package:
-`inspire_classifier/models/classifier_model/`
-
-In the production, the api is used to predict the 'coreness' of records using the `/api/predict/coreness` endpoint and passing `title` and `abstract` as json fields in a POST request (see [this file](inspire_classifier/app.py) for details).
