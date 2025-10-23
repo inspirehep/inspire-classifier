@@ -20,6 +20,7 @@
 # granted to it by virtue of its status as an Intergovernmental Organization
 # or submit itself to any jurisdiction.
 
+import os
 import shutil
 from pathlib import Path
 
@@ -27,34 +28,9 @@ import pytest
 from fastai.text.all import Learner
 from mock import patch
 
-from inspire_classifier.api import create_directories, train
-from inspire_classifier.app import create_app
-from inspire_classifier.utils import path_for
+from inspire_classifier.core.api import create_directories, train
+from inspire_classifier.core.utils import get_data_path
 
-
-@pytest.fixture(autouse=True, scope="session")
-def app():
-    app = create_app(train=True)
-    with app.app_context():
-        app.config["CLASSIFIER_MAXIMUM_VOCABULARY_SIZE"] = 500
-        app.config["CLASSIFIER_MINIMUM_WORD_FREQUENCY"] = 1
-        app.config["CLASSIFIER_LANGUAGE_MODEL_CYCLE_LENGTH"] = 1
-        app.config["CLASSIFIER_CLASSIFIER_CYCLE_LENGTH"] = 1
-        app.config["CLASSIFIER_LANGUAGE_MODEL_BATCH_SIZE"] = 10
-        app.config["CLASSIFIER_CLASSIFIER_BATCH_SIZE"] = 10
-        app.config["CLASSIFIER_VALIDATION_DATA_FRACTION"] = 0.2
-        yield app
-
-
-@pytest.fixture
-def app_client(app):
-    return app.test_client()
-
-@pytest.fixture
-def trained_app_client(app, tmp_path_factory):
-    app = create_app(train=False, instance_path=tmp_path_factory.getbasetemp())
-    with app.app_context():
-        return app.test_client()
 
 class Mock_Learner(Learner):
     """
@@ -76,11 +52,29 @@ class Mock_Learner(Learner):
 
 @pytest.fixture(scope="session")
 @patch("fastai.text.learner.text_classifier_learner", Mock_Learner)
-def _trained_pipeline(app, tmp_path_factory):
-    app.config["CLASSIFIER_BASE_PATH"] = tmp_path_factory.getbasetemp()
-    create_directories()
+def _trained_pipeline(tmp_path_factory):
+    create_directories(os.path.join(os.getcwd(), "inspire_classifier_testing"))
     shutil.copy(
         Path(__file__).parent / "fixtures" / "inspire_test_data.df",
-        path_for("dataframe"),
+        get_data_path(
+            os.path.join(os.getcwd(), "inspire_classifier_testing"),
+            "train_valid_data.df",
+        ),
     )
-    train()
+    train(
+        base_path=os.path.join(os.getcwd(), "inspire_classifier_testing"),
+        cuda_device_id=-1,
+        language_model_cycle_length=1,
+        classifier_cycle_length=1,
+        maximum_vocabulary_size=500,
+        minimum_word_frequency=1,
+        language_model_batch_size=10,
+        classifier_batch_size=10,
+        val_fraction=0.2,
+    )
+
+
+@pytest.fixture(scope="session", autouse=True)
+def _after_all_tests():
+    yield
+    shutil.rmtree(os.path.join(os.getcwd(), "inspire_classifier_testing"))

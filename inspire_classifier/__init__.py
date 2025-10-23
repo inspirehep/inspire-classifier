@@ -23,3 +23,7 @@
 """INSPIRE module aimed at automatically classifying the new papers that are added to
 INSPIRE, such as if they are core or not, or the arXiv category corresponding to each
 of them."""
+
+from inspire_classifier.core.model import Classifier
+
+__all__ = ["Classifier"]

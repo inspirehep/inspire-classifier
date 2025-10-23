@@ -1,4 +1,7 @@
+import logging
 import os
+import warnings
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -19,12 +22,18 @@ from fastai.text.all import (
 )
 from sklearn.metrics import f1_score
 
-from inspire_classifier.utils import (
+from inspire_classifier.core.utils import (
     export_classifier_path,
     load_encoder_path,
     save_encoder_path,
     softmax,
 )
+
+warnings.filterwarnings(
+    "ignore", message="load_learner` uses Python's insecure pickle module"
+)
+
+logger = logging.getLogger(__name__)
 
 
 class LanguageModel(object):
@@ -69,7 +78,6 @@ class LanguageModel(object):
             pin_memory=True,
         )
 
-        # save vocab
         pd.to_pickle(dls_lm.vocab, data_itos_path)
 
         self.learner = language_model_learner(
@@ -83,24 +91,50 @@ class LanguageModel(object):
         ).to_fp16()
 
     def train(self, finetuned_language_model_encoder_save_path, cycle_length=15):
-        print("language model training starts")
-        print(f"Loaded torch version: {torch.__version__}")
+        logger.info("language model training starts")
+        logger.info(f"Loaded torch version: {torch.__version__}")
         self.learner.fit_one_cycle(1, 1e-2)
         self.learner.unfreeze()
         self.learner.fit_one_cycle(cycle_length, 1e-3)
-        print("language model training finished, saving encoder")
+        logger.info("language model training finished, saving encoder")
         save_encoder_path(self.learner, finetuned_language_model_encoder_save_path)
-        print("encoder saved")
+        logger.info("encoder saved")
 
 
 class Classifier:
-    def __init__(self, cuda_device_id):
+    def __init__(self, train=False, cuda_device_id=-1, model_path=None):
+        """Classifier model for document classification.
+
+        Args:
+            train (bool): Whether the model is being initialized for training.
+            Defaults to False.
+            cuda_device_id (int): The CUDA device ID to use. Defaults to -1 (CPU).
+            model_path (str): Path to the pre-trained model file.
+        """
         if torch.cuda.is_available() and cuda_device_id >= 0:
             torch.cuda.set_device(cuda_device_id)
             self.cpu = False
         else:
             default_device(False)
             self.cpu = True
+
+        if not train:
+            self.model_path = model_path or (
+                Path(__file__).parent.parent
+                / "models"
+                / "classifier_model"
+                / "classifier.h5"
+            )
+            if self.model_path and os.path.exists(self.model_path):
+                self.load_model()
+            else:
+                raise FileNotFoundError(f"Model file not found at {self.model_path}")
+
+    def load_model(self):
+        """Load the trained model from file."""
+        if not self.model_path or not os.path.exists(self.model_path):
+            raise FileNotFoundError(f"Model file not found at {self.model_path}")
+        self.model = load_learner(self.model_path)
 
     def load_training_and_validation_data(
         self, train_valid_data_dir, data_itos_path, batch_size=10
@@ -147,8 +181,8 @@ class Classifier:
         )
 
     def train(self, trained_classifier_save_path, cycle_length=14):
-        print("Core classifier model training starts")
-        print(f"Loaded torch version: {torch.__version__}")
+        logger.info("Core classifier model training starts")
+        logger.info(f"Loaded torch version: {torch.__version__}")
 
         self.learner.fit_one_cycle(1, 2e-2)
         self.learner.freeze_to(-2)
@@ -157,7 +191,7 @@ class Classifier:
         self.learner.fit_one_cycle(1, slice(5e-3 / (2.6**4), 5e-3))
         self.learner.unfreeze()
         self.learner.fit_one_cycle(cycle_length, slice(1e-3 / (2.6**4), 1e-3))
-        print("Core classifier model training finished")
+        logger.info("Core classifier model training finished")
         export_classifier_path(self.learner, trained_classifier_save_path)
         self.calculate_f1_for_validation_dataset()
 
@@ -167,12 +201,38 @@ class Classifier:
     def predict(self, text, temperature=0.25):
         with self.model.no_bar(), self.model.no_logging():
             prediction_scores = self.model.predict(text)
-        return softmax(prediction_scores[-1].numpy(), temperature)
+        return softmax(prediction_scores[-1].numpy(), temp=temperature)
+
+    def predict_coreness(self, title, abstract):
+        """
+        Predicts the most probable category (core, non_core, rejected)
+        for a given title and abstract.
+
+        Args:
+            title (str): The title of the document.
+            abstract (str): The abstract of the document.
+        Returns:
+            dict: A dictionary containing the predicted category and its score.
+
+        Example:
+            >>> classifier = Classifier()
+            >>> title = "Search for new physics in high-energy particle collisions"
+            >>> abstract = "We present results from a search for beyond..."
+            >>> result = classifier.predict_coreness(title, abstract)
+            >>> print(result)
+            {'prediction': 'core', 'score': 0.85}
+        """
+        text = title + " <ENDTITLE> " + abstract
+        categories = ["rejected", "non_core", "core"]
+        class_probabilities = self.predict(text)
+        prediction = categories[np.argmax(class_probabilities)]
+        prediction_score = float(np.max(class_probabilities))
+        return {"prediction": prediction, "score": prediction_score}
 
     def calculate_f1_for_validation_dataset(self):
         predictions = self.learner.get_preds(dl=self.dataloader.valid)
         y_pred = np.argmax(np.array(predictions[0]), axis=1)
         f1_validation_score = f1_score(predictions[1], y_pred, average="micro")
 
-        print(f"Validation score (f1): {f1_validation_score}")
+        logger.info(f"Validation score (f1): {f1_validation_score}")
         return f1_validation_score

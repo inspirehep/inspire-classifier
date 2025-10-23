@@ -1,28 +1,15 @@
 name: Pull request master
 
 on:
-  pull_request_target:
+  pull_request:
     branches: [master]
 
 jobs:
-  pre-commit:
-    uses: ./.github/workflows/pre-commit.yml
+  lint:
+    uses: ./.github/workflows/lint.yml
     with:
       ref: ${{ github.event.pull_request.head.sha }}
-    secrets: inherit
-  build_and_test:
-    needs: pre-commit
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        ref: ${{ github.event.pull_request.head.sha }}
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
-    - name: Build Docker image
-      run: |
-        docker build -t cern-sis/inspire/classifier .
-    - name: Test Docker image
-      run: |
-        docker run --rm cern-sis/inspire/classifier poetry run pytest tests/
+
+  test-python:
+    needs: [lint]
+    uses: ./.github/workflows/test-python.yml

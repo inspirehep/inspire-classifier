@@ -4,56 +4,11 @@ on:
   push:
     branches: [master]
 
-defaults:
-  run:
-    shell: bash
-
 jobs:
-  pre-commit:
-    uses: ./.github/workflows/pre-commit.yml
-    with:
-      ref: ${{ github.sha }}
+  test-python:
+    uses: ./.github/workflows/test-python.yml
+
+  bump_version:
+    needs: [test-python]
+    uses: ./.github/workflows/bump-and-publish.yml
     secrets: inherit
-
-  build_and_test:
-    needs: pre-commit
-    runs-on: ubuntu-latest
-    outputs:
-      image-id: ${{ steps.build.outputs.image-id }}
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.sha }}
-      - id: build
-        name: Build and push
-        uses: cern-sis/gh-workflows/.github/actions/docker-build@v6.5
-        with:
-          image: cern-sis/inspire/classifier
-          context: .
-          registry: registry.cern.ch
-          cache: false
-          tags: |
-            type=ref,event=branch
-            type=ref,event=pr
-            type=ref,event=tag
-          username: ${{ secrets.HARBOR_USERNAME }}
-          password: ${{ secrets.HARBOR_PASSWORD }}
-      - name: Test image
-        run: |
-          docker run --rm \
-            registry.cern.ch/cern-sis/inspire/classifier@${{ steps.build.outputs.image-id }} \
-            poetry run pytest tests/
-
-
-  deploy:
-    needs: build_and_test
-    runs-on: ubuntu-latest
-    steps:
-      - name: send event
-        uses: cern-sis/gh-workflows/.github/actions/kubernetes-project-new-images@v6.3.0
-        with:
-          event-type: update
-          images: |
-            cern-sis/inspire/classifier@${{ needs.build_and_test.outputs.image-id }}
-          token: ${{ secrets.PAT_FIRE_EVENTS_ON_CERN_SIS_KUBERNETES }}
