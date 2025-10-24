@@ -19,7 +19,7 @@ include = ["inspire_classifier/models/classifier_model/classifier.h5"]
 python = ">=3.11,<=3.13"
 fastai = "<2.8.0"
 numpy = "^2.3.4"
-click = "^8.3.0"
+click = "^8.0.0"
 click-spinner = "^0.1.10"
 tqdm = "^4.67.1"
 pandas = "^2.3.3"
