@@ -220,14 +220,19 @@ class Classifier:
             >>> abstract = "We present results from a search for beyond..."
             >>> result = classifier.predict_coreness(title, abstract)
             >>> print(result)
-            {'prediction': 'core', 'score': 0.85}
+            {'prediction': 'core', 'scores':
+                {'rejected': 0.1, 'non_core': 0.3, 'core': 0.6}}
+            }
         """
         text = title + " <ENDTITLE> " + abstract
         categories = ["rejected", "non_core", "core"]
         class_probabilities = self.predict(text)
-        prediction = categories[np.argmax(class_probabilities)]
-        prediction_score = float(np.max(class_probabilities))
-        return {"prediction": prediction, "score": prediction_score}
+        assert len(class_probabilities) == 3
+
+        predicted_class = categories[np.argmax(class_probabilities)]
+        output_dict = {"prediction": predicted_class}
+        output_dict["scores"] = dict(zip(categories, class_probabilities, strict=False))
+        return output_dict
 
     def calculate_f1_for_validation_dataset(self):
         predictions = self.learner.get_preds(dl=self.dataloader.valid)

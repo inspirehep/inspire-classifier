@@ -144,5 +144,13 @@ def test_predict_coreness():
         )
     )
     output_dict = classifier.predict_coreness(TEST_TITLE, TEST_ABSTRACT)
-    assert set(output_dict.keys()) == {"prediction", "score"}
+    assert set(output_dict.keys()) == {"prediction", "scores"}
     assert output_dict["prediction"] in {"rejected", "non_core", "core"}
+    assert set(output_dict["scores"].keys()) == {"rejected", "non_core", "core"}
+    assert isclose(
+        output_dict["scores"]["rejected"]
+        + output_dict["scores"]["non_core"]
+        + output_dict["scores"]["core"],
+        1.0,
+        abs_tol=1e-2,
+    )
