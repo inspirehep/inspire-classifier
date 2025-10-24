@@ -16,7 +16,7 @@ title = "Search for new physics in high-energy particle collisions"
 abstract = "We present results from a search for beyond..."
 
 result = classifier.predict_coreness(title, abstract)
-print(result) --> {'prediction': 'core', 'score': 0.85}
+print(result) --> {'prediction': 'core', 'scores': {'rejected': 0.1, 'non_core': 0.3, 'core': 0.6}}
 ```
 
 
