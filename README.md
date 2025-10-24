@@ -47,3 +47,7 @@ The [`train_classifier.py`](scripts/train_classifier.py) script will run the com
 ```
 poetry run python scripts/train_classifier.py
 ```
+
+
+### 3. Upload the model to CERN S3
+In order to use the new model in production upload it to CERN S3 and follow [this writeup](https://confluence.cern.ch/display/RCSSIS/Update+Airflow+Base+Image+%28with+classifier+model%29+for+INSPIRE)
