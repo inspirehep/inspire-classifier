@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "inspire-classifier"
-version = "2.0.4"
+version = "2.0.5"
 description = "INSPIRE package aimed to automatically classify the new papers that are added to INSPIRE, such as if they are core or not."
 authors = ["CERN <admin@inspirehep.net>"]
 license = "MIT License"
