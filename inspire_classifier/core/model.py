@@ -226,7 +226,7 @@ class Classifier:
         """
         text = title + " <ENDTITLE> " + abstract
         categories = ["rejected", "non_core", "core"]
-        class_probabilities = self.predict(text)
+        class_probabilities = self.predict(text).tolist()
         assert len(class_probabilities) == 3
 
         predicted_class = categories[np.argmax(class_probabilities)]
