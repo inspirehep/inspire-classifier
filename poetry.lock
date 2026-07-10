@@ -28,6 +28,26 @@ files = [
 dev = ["backports.zoneinfo ; python_version < \"3.9\"", "freezegun (>=1.0,<2.0)", "jinja2 (>=3.0)", "pytest (>=6.0)", "pytest-cov", "pytz", "setuptools", "tzdata ; sys_platform == \"win32\""]
 
 [[package]]
+name = "beartype"
+version = "0.22.9"
+description = "Unbearably fast near-real-time pure-Python runtime-static type-checker."
+optional = false
+python-versions = ">=3.10"
+groups = ["main"]
+files = [
+    {file = "beartype-0.22.9-py3-none-any.whl", hash = "sha256:d16c9bbc61ea14637596c5f6fbff2ee99cbe3573e46a716401734ef50c3060c2"},
+    {file = "beartype-0.22.9.tar.gz", hash = "sha256:8f82b54aa723a2848a56008d18875f91c1db02c32ef6a62319a002e3e25a975f"},
+]
+
+[package.extras]
+dev = ["autoapi (>=0.9.0)", "celery", "click", "coverage (>=5.5)", "docutils (>=0.22.0)", "equinox ; sys_platform == \"linux\" and python_version < \"3.15.0\"", "fastmcp ; python_version < \"3.14.0\"", "jax[cpu] ; sys_platform == \"linux\" and python_version < \"3.15.0\"", "jaxtyping ; sys_platform == \"linux\"", "langchain ; python_version < \"3.14.0\" and sys_platform != \"darwin\" and platform_python_implementation != \"PyPy\"", "mypy (>=0.800) ; platform_python_implementation != \"PyPy\"", "nuitka (>=1.2.6) ; sys_platform == \"linux\" and python_version < \"3.14.0\"", "numba ; python_version < \"3.14.0\"", "numpy ; python_version < \"3.15.0\" and sys_platform != \"darwin\" and platform_python_implementation != \"PyPy\"", "pandera (>=0.26.0) ; python_version < \"3.14.0\"", "poetry", "polars ; python_version < \"3.14.0\"", "pydata-sphinx-theme (<=0.7.2)", "pygments", "pyinstaller", "pyright (>=1.1.370)", "pytest (>=6.2.0)", "redis", "rich-click", "setuptools", "sphinx", "sphinx (>=4.2.0,<6.0.0)", "sphinxext-opengraph (>=0.7.5)", "sqlalchemy", "torch ; sys_platform == \"linux\" and python_version < \"3.14.0\"", "tox (>=3.20.1)", "typer", "typing-extensions (>=3.10.0.0)", "xarray ; python_version < \"3.15.0\""]
+doc-ghp = ["mkdocs-material[imaging] (>=9.6.0)", "mkdocstrings-python (>=1.16.0)", "mkdocstrings-python-xref (>=1.16.0)"]
+doc-rtd = ["autoapi (>=0.9.0)", "pydata-sphinx-theme (<=0.7.2)", "setuptools", "sphinx (>=4.2.0,<6.0.0)", "sphinxext-opengraph (>=0.7.5)"]
+test = ["celery", "click", "coverage (>=5.5)", "docutils (>=0.22.0)", "equinox ; sys_platform == \"linux\" and python_version < \"3.15.0\"", "fastmcp ; python_version < \"3.14.0\"", "jax[cpu] ; sys_platform == \"linux\" and python_version < \"3.15.0\"", "jaxtyping ; sys_platform == \"linux\"", "langchain ; python_version < \"3.14.0\" and sys_platform != \"darwin\" and platform_python_implementation != \"PyPy\"", "mypy (>=0.800) ; platform_python_implementation != \"PyPy\"", "nuitka (>=1.2.6) ; sys_platform == \"linux\" and python_version < \"3.14.0\"", "numba ; python_version < \"3.14.0\"", "numpy ; python_version < \"3.15.0\" and sys_platform != \"darwin\" and platform_python_implementation != \"PyPy\"", "pandera (>=0.26.0) ; python_version < \"3.14.0\"", "poetry", "polars ; python_version < \"3.14.0\"", "pygments", "pyinstaller", "pyright (>=1.1.370)", "pytest (>=6.2.0)", "redis", "rich-click", "sphinx", "sqlalchemy", "torch ; sys_platform == \"linux\" and python_version < \"3.14.0\"", "tox (>=3.20.1)", "typer", "typing-extensions (>=3.10.0.0)", "xarray ; python_version < \"3.15.0\""]
+test-tox = ["celery", "click", "docutils (>=0.22.0)", "equinox ; sys_platform == \"linux\" and python_version < \"3.15.0\"", "fastmcp ; python_version < \"3.14.0\"", "jax[cpu] ; sys_platform == \"linux\" and python_version < \"3.15.0\"", "jaxtyping ; sys_platform == \"linux\"", "langchain ; python_version < \"3.14.0\" and sys_platform != \"darwin\" and platform_python_implementation != \"PyPy\"", "mypy (>=0.800) ; platform_python_implementation != \"PyPy\"", "nuitka (>=1.2.6) ; sys_platform == \"linux\" and python_version < \"3.14.0\"", "numba ; python_version < \"3.14.0\"", "numpy ; python_version < \"3.15.0\" and sys_platform != \"darwin\" and platform_python_implementation != \"PyPy\"", "pandera (>=0.26.0) ; python_version < \"3.14.0\"", "poetry", "polars ; python_version < \"3.14.0\"", "pygments", "pyinstaller", "pyright (>=1.1.370)", "pytest (>=6.2.0)", "redis", "rich-click", "sphinx", "sqlalchemy", "torch ; sys_platform == \"linux\" and python_version < \"3.14.0\"", "typer", "typing-extensions (>=3.10.0.0)", "xarray ; python_version < \"3.15.0\""]
+test-tox-coverage = ["coverage (>=5.5)"]
+
+[[package]]
 name = "blis"
 version = "1.3.0"
 description = "The Blis BLAS-like linear algebra library, as a self-contained C-extension."
@@ -285,6 +305,18 @@ gs = ["google-cloud-storage"]
 s3 = ["boto3 (>=1.34.0)"]
 
 [[package]]
+name = "cloudpickle"
+version = "3.1.2"
+description = "Pickler class to extend the standard pickle.Pickler functionality"
+optional = false
+python-versions = ">=3.8"
+groups = ["main"]
+files = [
+    {file = "cloudpickle-3.1.2-py3-none-any.whl", hash = "sha256:9acb47f6afd73f60dc1df93bb801b472f05ff42fa6c84167d25cb206be1fbf4a"},
+    {file = "cloudpickle-3.1.2.tar.gz", hash = "sha256:7fda9eb655c9c230dab534f1983763de5835249750e85fbcef43aaa30a9a2414"},
+]
+
+[[package]]
 name = "colorama"
 version = "0.4.6"
 description = "Cross-platform colored terminal text."
@@ -523,53 +555,52 @@ develop = ["coverage (<5.0.0)", "mock", "pytest (>=3.0.0)", "pytest-cov", "pytes
 
 [[package]]
 name = "fastai"
-version = "2.7.19"
+version = "2.8.7"
 description = "fastai simplifies training fast and accurate neural nets using modern best practices"
 optional = false
-python-versions = ">=3.9"
+python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "fastai-2.7.19-py3-none-any.whl", hash = "sha256:8c47d72ac28cd09671ce85f42100436b99af44e4147bd9df0495049b50708d3b"},
-    {file = "fastai-2.7.19.tar.gz", hash = "sha256:0a804006d3b6364acd5544f3439f2f05d45edabaf88e2dba8893b37a66b836c8"},
+    {file = "fastai-2.8.7-py3-none-any.whl", hash = "sha256:840145fe563bed47d35fb5da47121f9749b9ae7deca1a7f31189b045a6a72d9d"},
+    {file = "fastai-2.8.7.tar.gz", hash = "sha256:93be109daab077a73279bb2aba27fa72a206bbf055b0f1921475afde69b7705f"},
 ]
 
 [package.dependencies]
-fastcore = ">=1.5.29,<1.8"
+cloudpickle = "*"
+fastcore = ">=1.8.0"
 fastdownload = ">=0.0.5,<2"
 fastprogress = ">=0.2.4"
+fasttransform = ">=0.0.2"
 matplotlib = "*"
 packaging = "*"
 pandas = "*"
 pillow = ">=9.0.0"
-pip = "*"
+plum-dispatch = "*"
 pyyaml = "*"
 requests = "*"
 scikit-learn = "*"
 scipy = "*"
 spacy = "<4"
-torch = ">=1.10,<2.7"
+torch = ">=1.10,<3"
 torchvision = ">=0.11"
 
 [package.extras]
-dev = ["accelerate (>=0.21)", "albumentations", "captum (>=0.4.1)", "catalyst", "comet_ml", "flask", "flask_compress", "ipykernel", "ipywidgets", "kornia", "lightning", "ninja", "opencv-python", "pyarrow", "pydicom", "pytorch-ignite", "scikit-image", "sentencepiece", "tensorboard", "timm (>=0.9)", "transformers", "wandb"]
+dev = ["accelerate (>=0.21)", "albumentations", "captum (>=0.4.1)", "catalyst", "comet_ml", "flask", "flask_compress", "ipykernel", "ipywidgets", "kornia", "lightning", "nbdev", "ninja", "opencv-python", "pyarrow", "pydicom", "pytorch-ignite", "scikit-image", "sentencepiece", "tensorboard", "timm (>=0.9)", "transformers", "wandb"]
 
 [[package]]
 name = "fastcore"
-version = "1.7.29"
+version = "2.0.1"
 description = "Python supercharged for fastai development"
 optional = false
-python-versions = ">=3.9"
+python-versions = ">=3.11"
 groups = ["main"]
 files = [
-    {file = "fastcore-1.7.29-py3-none-any.whl", hash = "sha256:76fd4815eabbed704faca3abfea4b7e1f98b6351ba6c869a2d405f37bc4b0074"},
-    {file = "fastcore-1.7.29.tar.gz", hash = "sha256:e7e734cbe58805a22c205341c6671de562a8abba54b13eeb24cdb4486d066e31"},
+    {file = "fastcore-2.0.1-py3-none-any.whl", hash = "sha256:e5c6c9ea5436cac14d3223a5e6a978ec00554fe732d767a5cc93494628d42b90"},
+    {file = "fastcore-2.0.1.tar.gz", hash = "sha256:7abe5039ad25ce308c7df78cac871712cec1d825f59b1bb3a828307f6d075f57"},
 ]
 
-[package.dependencies]
-packaging = "*"
-
 [package.extras]
-dev = ["llms-txt", "matplotlib", "nbclassic", "nbdev (>=0.2.39)", "numpy", "pandas", "pillow", "pysymbol_llm", "torch"]
+dev = ["llms-txt", "matplotlib", "nbclassic", "nbdev (>=0.2.39)", "numpy", "pandas", "pillow", "plum-dispatch", "pysymbol_llm", "toolslm", "torch"]
 
 [[package]]
 name = "fastdownload"
@@ -598,6 +629,25 @@ files = [
     {file = "fastprogress-1.0.3-py3-none-any.whl", hash = "sha256:6dfea88f7a4717b0a8d6ee2048beae5dbed369f932a368c5dd9caff34796f7c5"},
     {file = "fastprogress-1.0.3.tar.gz", hash = "sha256:7a17d2b438890f838c048eefce32c4ded47197ecc8ea042cecc33d3deb8022f5"},
 ]
+
+[[package]]
+name = "fasttransform"
+version = "0.0.2"
+description = "Transform is the main building block of data pipelines in fastai. And elsewhere if you want."
+optional = false
+python-versions = ">=3.9"
+groups = ["main"]
+files = [
+    {file = "fasttransform-0.0.2-py3-none-any.whl", hash = "sha256:72fd7f5d577797370e95255a005a5fd4eb43a3d863f5dbab338562421ab660e1"},
+    {file = "fasttransform-0.0.2.tar.gz", hash = "sha256:18ea6964128be779a1c483d4775f1b5a2e452f915c2d30dfa2d91adca98453d7"},
+]
+
+[package.dependencies]
+fastcore = "*"
+plum-dispatch = "*"
+
+[package.extras]
+dev = ["matplotlib", "numpy", "pandas"]
 
 [[package]]
 name = "filelock"
@@ -2056,18 +2106,6 @@ tests = ["check-manifest", "coverage (>=7.4.2)", "defusedxml", "markdown2", "ole
 xmp = ["defusedxml"]
 
 [[package]]
-name = "pip"
-version = "25.2"
-description = "The PyPA recommended tool for installing Python packages."
-optional = false
-python-versions = ">=3.9"
-groups = ["main"]
-files = [
-    {file = "pip-25.2-py3-none-any.whl", hash = "sha256:6d67a2b4e7f14d8b31b8b52648866fa717f45a1eb70e83002f4331d07e953717"},
-    {file = "pip-25.2.tar.gz", hash = "sha256:578283f006390f85bb6282dffb876454593d637f5d1be494b5202ce4877e71f2"},
-]
-
-[[package]]
 name = "platformdirs"
 version = "4.5.0"
 description = "A small Python package for determining appropriate platform-specific dirs, e.g. a `user data dir`."
@@ -2099,6 +2137,35 @@ files = [
 [package.extras]
 dev = ["pre-commit", "tox"]
 testing = ["coverage", "pytest", "pytest-benchmark"]
+
+[[package]]
+name = "plum-dispatch"
+version = "2.9.0"
+description = "Multiple dispatch in Python"
+optional = false
+python-versions = ">=3.10"
+groups = ["main"]
+files = [
+    {file = "plum_dispatch-2.9.0-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:6c5f5dfd1afd42dfd738c1b7701b9e03279c52b4952d6bb56e169564b1d48eb9"},
+    {file = "plum_dispatch-2.9.0-cp310-cp310-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:7cec06a2f2545a2b09e8dde81be6f1512e1df850b3ab2fbf582ef79a10956b23"},
+    {file = "plum_dispatch-2.9.0-cp310-cp310-win_amd64.whl", hash = "sha256:7e767a7e52f7d4cb3f10010024047d043c29d7ed0ab7df63bceef5371c44a2fa"},
+    {file = "plum_dispatch-2.9.0-cp311-cp311-macosx_10_9_x86_64.whl", hash = "sha256:25f62c2209b7bff00c6cdc25fe153ac09df304d7d833fab2852fc46fffbb7e87"},
+    {file = "plum_dispatch-2.9.0-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:f4d34cab84908abbdff501e356296eba960ff5d5fc04668b71ebc6f9ff84fa2f"},
+    {file = "plum_dispatch-2.9.0-cp311-cp311-win_amd64.whl", hash = "sha256:1050150b6ae3600ac19a406b23cb7d0707825b227f608a54b8be9994d1f4b710"},
+    {file = "plum_dispatch-2.9.0-cp312-cp312-macosx_10_13_x86_64.whl", hash = "sha256:39a325b0b041fad687271d71abc11b5271d5a3b62af2c6b1271f4ececc3b59de"},
+    {file = "plum_dispatch-2.9.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:d39b20a1af776a39e4a0833e97c6258d938e5d874c7f3537bb7d772c39718c1e"},
+    {file = "plum_dispatch-2.9.0-cp312-cp312-win_amd64.whl", hash = "sha256:beb9b92c6994404a0d2dc83c857263f5da49519575e5cbb8a13060652746c44c"},
+    {file = "plum_dispatch-2.9.0-cp313-cp313-macosx_10_13_x86_64.whl", hash = "sha256:78987caf558fbdd675a7a4a5c144069f1f9524610195123fb7d0f0234d0af01a"},
+    {file = "plum_dispatch-2.9.0-cp313-cp313-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:36662d76ae6d87aaa041fade036d2242f0b88b68c9fb4c96b7ba0026320065d3"},
+    {file = "plum_dispatch-2.9.0-cp313-cp313-win_amd64.whl", hash = "sha256:a0d16daf09482a6588025e9f133a338d99474e8dd3c3dbbc4c5282a4fffe5a0e"},
+    {file = "plum_dispatch-2.9.0-py3-none-any.whl", hash = "sha256:5a516cdac5460343937a2b813562ac00b0eeac973ac023916e538610bdf34397"},
+    {file = "plum_dispatch-2.9.0.tar.gz", hash = "sha256:fb45c5b2dd4dadd57def51bcf321dfa3a258df5c725f43adea7e7f6db3b79b52"},
+]
+
+[package.dependencies]
+beartype = {version = ">=0.16.2", markers = "python_version < \"3.14\""}
+rich = ">=10.0"
+typing-extensions = ">=4.9.0"
 
 [[package]]
 name = "pre-commit"
@@ -3396,4 +3463,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.11,<=3.13"
-content-hash = "e1b6a1ce28917bd82dc1cfa9c449238255fc8418d780ea2a690df85ad0e02925"
+content-hash = "19a0b197676cdd682c7ff7212808ef88b16ecf20d69194808058af6b92036bbf"
