@@ -29,7 +29,7 @@ print(result) --> {'prediction': 'core', 'scores': {'rejected': 0.1, 'non_core':
 
 ## Train new classifier model
 ### 1. Gather training data
-Set the environment variables for inspire-prod es database and run the [`create_dataset.py`](scripts/create_dataset.py) file, passing the range of years. This will create a `inspire_classifier_dataset.pkl`, containing the label (core, non-core, rejected) as well as the title and abstract of the fetched records. This data will be used in the next step to train the model. Make sure the generated file is called  `inspire_classifier_dataset.pkl`!
+Set the environment variables for inspire-prod es database and run the [`create_dataset.py`](scripts/create_dataset.py) file, passing the range of years. This creates a file named `inspire_classifier_dataset_YYYY-MM-DD_YYYY-MM-DD.pkl` in the current directory, with the requested start and end dates in the filename. It contains the label (core, non-core, rejected) as well as the title and abstract of the fetched records. Rename this file to `inspire_classifier_dataset.pkl` before training; see the [dataset generation example](scripts/README.md).
 
 ```
 export ES_USERNAME=XXXX
