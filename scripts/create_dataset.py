@@ -2,9 +2,8 @@ import os
 
 import click
 import pandas as pd
-from elasticsearch_dsl import Q, Search
-from elasticsearch_dsl.connections import connections
 from inspire_utils.record import get_value
+from opensearchpy import Q, Search, connections
 from tqdm import tqdm
 
 DECISIONS_MAPPING = {
