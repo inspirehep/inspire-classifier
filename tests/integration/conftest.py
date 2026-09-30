@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # This file is part of INSPIRE.
 # Copyright (C) 2014-2017 CERN.
@@ -23,10 +22,10 @@
 import os
 import shutil
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 from fastai.text.all import Learner
-from mock import patch
 
 from inspire_classifier.core.api import create_directories, train
 from inspire_classifier.core.utils import get_data_path
